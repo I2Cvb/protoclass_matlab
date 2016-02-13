@@ -1,0 +1,111 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% classification_melanoma_main.m
+%%% Author : Mojdeh Rastgoo 
+%%% UB-UdG 
+%%% Version : 1.0 
+%%% Two option exists for validation either cross validation or leave one
+%%% out the user should specify this option at the begining, otherwise cv
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    addpath ../../third_party/Basic_function/
+    addpath ../validation/
+
+
+    %%% Initialization
+    dataPath = '/home/mojdeh/Documents/PhD/Coding/OrganizedCode/protoclass_matlab/data';
+    resultPath = '/home/mojdeh/Documents/Coding/OrganizedCode/protoclass_matlab/protoclass/results/';
+    load(fullfile(dataPath, 'PH2_Train_Test_80_20.mat')); 
+    %     load(fullfile(dataPath, 'PH2_Train_Test_80_20.mat'));
+    Labels = BinaryLabels; 
+    validation.opt = 'CV'; 
+
+    
+    % You can add the names of your feactures to the list 
+    
+    FeatureLists = csv2cell(fullfile(dataPath, 'feature_Patch.csv'), 'fromfile'); 
+    FeatureLists = FeatureLists(2:end); 
+    
+    % Un-comment the following line if there are more features in the
+    %%% feature_patch.csv and if you like to use their combination
+    %%% List of features and their combination based on the csv file feature_Patch.csv 
+%     FIdx = [1 0 0 0 ; 0 2 0 0 ; 0 0 3 0 ; 0 0 0 4 ; 0 0 3 4 ; 1 2 0 0 ; 1 0 3 4 ;...
+%         0 2 3 4 ; 1 2 3 4]; 
+      FIdx = [1]; 
+
+
+    for IND = 1 : length(FIdx)
+
+        FVCombined = []; 
+        %%% Loading the appropriate data based on the FIdx 
+        Index = FIdx(IND,:); 
+        NonZeroIndex = find(Index~=0); 
+        NonZeroIndex = Index(NonZeroIndex); 
+        for PathIdx = 1 : length(NonZeroIndex)
+            load(fullfile(dataPath, cell2mat(FeatureLists(NonZeroIndex(PathIdx))))); 
+            display(['Feature:' cell2mat(FeatureLists(NonZeroIndex(PathIdx)))]); 
+            FVCombined = [FVCombined, FV]; clear FV ; 
+        end
+        FV = FV'; 
+        FV = FVCombined;    
+        FeatureSize = size(FV, 2);  
+        display(['The Features in line .... ' num2str(IND)  'are being analysed']); 
+
+        %%% Classification validation based on validation_opt = 'CV' or 'OvA'
+        %%%% Validation_opt = CV 
+        if strncmpi(validation.opt , 'CV', 2) == 1 
+            pred_label = zeros(size(testingIdx)); 
+            pred_prob  = zeros(size(testingIdx)); 
+            for cv = 5 : size(trainingIdx,2)
+                training_data = FV(trainingIdx(:,cv),:); 
+                training_label= Labels(trainingIdx(:,cv)); 
+                testing_data = FV(testingIdx(:,cv),:); 
+                testing_label = Labels(testingIdx(:,cv)); 
+                classifierId = 'rf';
+                high_level_Id= 'bow'; 
+                disp ([classifierId ' and ' high_level_Id ' was chosen for classification']); 
+                if (strncmpi('BoW', high_level_, 2) == 1)
+                elseif (strncmpi('RF', classifierId, 2) == 1)
+                end 
+                
+                %%% It seems that for cv 5 svm can not classifiy it needs
+                %%% to be checked RF, KNN,GB, LDA were fine , the pipeline
+                %%% is ok the problem should be someweher else in the
+                %%% testingIdx or svm classifier requirements 
+                [pred_label(:,cv) pred_prob(:,cv)] = classification(training_data, training_label, testing_data, testing_label, classifierId , 'ntree', 50,'svm_kernel', 1); 
+                [acc(cv), sen(cv), spec(cv), prec(cv)] = Evaluation(testing_label, pred_label(:,cv));
+                if (sen(cv) == 0 && prec(cv) == 0) || (spec(cv) == 0) 
+                    x(:,cv) = 0 ; y(:,cv) = 1 ; t(:,cv) = 0 ; auc(cv) = 0 ; 
+                else 
+                    [x(:,cv),y(:,cv),t(:,cv),auc(cv)] = perfcurve(testing_label,pred_label(:,cv),'1');
+                end 
+            end 
+            Acc = mean(acc); Sen = mean(sen); Spec = mean(spec); Prec = mean(prec); 
+            AUC = mean(auc); 
+            X = mean(x,2); 
+            Y = mean(y,2); 
+            resultName = 'GiveaName.mat'; 
+            save(fullfile(resultPath, resultName), 'Acc', 'Sen', 'Spec', 'Prec', 'AUC', 'X', 'Y'); 
+
+        %%%% Validation_opt = OvA 
+        elseif strncmpi (validation.opt , 'OvA', 3) == 1
+            IndexList = 1 :1: length(Labels);  
+            for Id = 1: length(Labels)
+                Index = IndexList ; 
+                Index(Id) = []; 
+                testing_data = FV(IndexList(Id), :); 
+                testing_label = Labels(IndexList(Id));
+                training_data = FV(Index,:); 
+                training_label = Labels(Index);
+                %%% classification 
+                classifierId = 'RF'; 
+                disp ([classifierId 'was chosen for classification'])
+                [pred_label(Id) pred_prob(Id)] = classification(training_data, training_label, testing_data, testing_label, classifierId , 'ntree', 50); 
+
+            end 
+            disp('One versus all validation is performed')
+            [Acc, Sen, Spec, Prec] = Evaluation(Labels, pred_label); 
+            resultName = 'GiveaName.mat'; 
+            save(fullfile(resultPath, resultName), 'Acc', 'Sen', 'Spec', 'Prec'); 
+
+        end 
+    end 
+
