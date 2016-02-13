@@ -3,8 +3,7 @@
 %%% Author: Mojdeh Rastgoo
 %%% UB-UdG
 %%% Version: 1.0
-%%% The code is highly inspired from vl_feat bow approach 
-%%% url : http://www.vlfeat.org/applications/apps.html
+%%% The sparsity of the code is provided by Desire Sidibe 
 %%% Note : This function is intended to use with the structure elemenets 
 %%% ---------------------------------------------------
 %%% Parameters: 
@@ -13,13 +12,10 @@
 %%% slevel          | sparisty level (default = 4 ); example [2,4,8]
 %%% dSize           | dictionary size (default = 200); 
 %%% PoolingType     | pooling type (default = 'max') ['max', 'avg', 'mss', 'abs']
-%%% iternum         | numbe
-%%% iter            | Maximum number of iterations 
-%%% quantizer       | 'kdtree' or 'vq'
-%%% Note : 
+%%% iternum         | number of the times ksvd is performed (default = 10)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [param, train_descr, test_descr] = Codebook_SCF (trainSet, testSet, varargin)
+function [params, train_descr, test_descr] = Codebook_SCF (trainSet, testSet, varargin)
 
 
 % Add the path to the k-svd toolbox
@@ -33,22 +29,11 @@ vl_setup
 input.featureSet = []; 
 input.save_path = []; 
 input.sLevel = 4 ; 
-input.dSize = 200; 
+input.dSize = 100; 
 input.PoolingType = 'max ' ;            % 'max','avg', 'mss', 'abs'
 input.iternum = 10;                     % number of ksvd iterations to perform 
 
-%input = parseargs(input,varargin{:});
-
-
-
-%%% remove this part later 
-    dataPath = '/home/mojdeh/Documents/PhD/Coding/OrganizedCode/protoclass_matlab/data';
-    resultPath = '/home/mojdeh/Documents/Coding/OrganizedCode/protoclass_matlab/protoclass/results/';
-    load(fullfile(dataPath, 'PH2_Train_Test_80_20.mat')); 
-    load(fullfile(dataPath, 'FV_MDB_Patch_LBP.mat')); 
-    FV = FV'; 
-    trainSet = FV(trainingIdx(:,1)); 
-    testSet = FV(testingIdx(:,1)); 
+input = parseargs(input,varargin{:});
 
 %%% Learning the Dictionary 
             
@@ -83,15 +68,15 @@ input.iternum = 10;                     % number of ksvd iterations to perform
         for t = 1 : length(featureSet)
           % sparse coding using the learned dictionary
           params.data = cell2mat(featureSet(t));
+          params.data = params.data'; 
           alpha = omp(D'*params.data, D'*D, params.Tdata);
-          switch PoolingType
-            case 'max'
+          if (strncmpi('max', input.PoolingType, 3) == 1)
                 z = max( abs(alpha), [], 2); % max pooling
-            case 'mss'
+          elseif (strncmpi('mss', input.PoolingType, 3) == 1)
                 z = sqrt(mean(alpha.^2, 2)); % mean squared statistics
-            case 'avg'
+          elseif (strncmpi('avg', input.PoolingType, 3) == 1)
                 z = mean(alpha, 2);          % average statistic
-            case 'abs'
+          elseif (strncmpi('abs', input.PoolingType, 3) == 1)
                 z = mean(abs(alpha), 2);     % mean absolute value
           end
           FV = [FV; z'];
@@ -109,15 +94,16 @@ input.iternum = 10;                     % number of ksvd iterations to perform
         for t = 1:length(trainSet)
           % sparse coding using the learned dictionary
           params.data = cell2mat(trainSet(t));
+          params.data = params.data'; 
           alpha = omp(D'*params.data, D'*D, params.Tdata);
-          switch PoolingType
-            case 'max'
+    
+             if (strncmpi('max', input.PoolingType, 3) == 1)
                 z = max( abs(alpha), [], 2); % max pooling
-            case 'mss'
+             elseif (strncmpi('max', input.PoolingType, 3) == 1)
                 z = sqrt(mean(alpha.^2, 2)); % mean squared statistics
-            case 'avg'
+             elseif (strncmpi('max', input.PoolingType, 3) == 1)
                 z = mean(alpha, 2);          % average statistic
-            case 'abs'
+             if (strncmpi('max', input.PoolingType, 3) == 1)
                 z = mean(abs(alpha), 2);     % mean absolute value
           end
           train_descr = [train_descr; z'];
@@ -130,8 +116,9 @@ input.iternum = 10;                     % number of ksvd iterations to perform
         for t=1:length(testSet)
           % sparse coding using the learned dictionary
           params.data = cell2mat(testSet(t));
+          params.data = params.data'; 
           alpha = omp(D'*params.data, D'*D, params.Tdata);
-          switch PoolingType
+          switch input.PoolingType
             case 'max'
                 z = max( abs(alpha), [], 2); % max pooling
             case 'mss'

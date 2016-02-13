@@ -3,8 +3,7 @@
 %%% Author: Mojdeh Rastgoo
 %%% UB-UdG
 %%% Version: 1.0
-%%% The code is highly inspired from vl_feat bow approach 
-%%% url : http://www.vlfeat.org/applications/apps.html
+%%% The sparsity of the code is provided by Desire Sidibe 
 %%% Note : This function is intended to use with the structure elemenets 
 %%% ---------------------------------------------------
 %%% Parameters: 
@@ -14,7 +13,6 @@
 %%% dSize           | dictionary size (default = 200); 
 %%% PoolingType     | pooling type (default = 'max') ['max', 'avg', 'mss', 'abs']
 %%% iternum         | number of the times ksvd is performed (default = 10)
-%%% Note : 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [params, train_descr, test_descr] = Codebook_SCF (trainSet, testSet, varargin)
@@ -31,7 +29,7 @@ vl_setup
 input.featureSet = []; 
 input.save_path = []; 
 input.sLevel = 4 ; 
-input.dSize = 200; 
+input.dSize = 100; 
 input.PoolingType = 'max ' ;            % 'max','avg', 'mss', 'abs'
 input.iternum = 10;                     % number of ksvd iterations to perform 
 
@@ -70,15 +68,15 @@ input = parseargs(input,varargin{:});
         for t = 1 : length(featureSet)
           % sparse coding using the learned dictionary
           params.data = cell2mat(featureSet(t));
+          params.data = params.data'; 
           alpha = omp(D'*params.data, D'*D, params.Tdata);
-          switch input.PoolingType
-            case 'max'
+          if (strncmpi('max', input.PoolingType, 3) == 1)
                 z = max( abs(alpha), [], 2); % max pooling
-            case 'mss'
+          elseif (strncmpi('mss', input.PoolingType, 3) == 1)
                 z = sqrt(mean(alpha.^2, 2)); % mean squared statistics
-            case 'avg'
+          elseif (strncmpi('avg', input.PoolingType, 3) == 1)
                 z = mean(alpha, 2);          % average statistic
-            case 'abs'
+          elseif (strncmpi('abs', input.PoolingType, 3) == 1)
                 z = mean(abs(alpha), 2);     % mean absolute value
           end
           FV = [FV; z'];
@@ -96,15 +94,16 @@ input = parseargs(input,varargin{:});
         for t = 1:length(trainSet)
           % sparse coding using the learned dictionary
           params.data = cell2mat(trainSet(t));
+          params.data = params.data'; 
           alpha = omp(D'*params.data, D'*D, params.Tdata);
-          switch input.PoolingType
-            case 'max'
+    
+          if (strncmpi('max', input.PoolingType, 3) == 1)
                 z = max( abs(alpha), [], 2); % max pooling
-            case 'mss'
+          elseif (strncmpi('mss', input.PoolingType, 3) == 1)
                 z = sqrt(mean(alpha.^2, 2)); % mean squared statistics
-            case 'avg'
+          elseif (strncmpi('avg', input.PoolingType, 3) == 1)
                 z = mean(alpha, 2);          % average statistic
-            case 'abs'
+          elseif (strncmpi('abs', input.PoolingType, 3) == 1)
                 z = mean(abs(alpha), 2);     % mean absolute value
           end
           train_descr = [train_descr; z'];
@@ -117,15 +116,16 @@ input = parseargs(input,varargin{:});
         for t=1:length(testSet)
           % sparse coding using the learned dictionary
           params.data = cell2mat(testSet(t));
+          params.data = params.data'; 
           alpha = omp(D'*params.data, D'*D, params.Tdata);
-          switch input.PoolingType
-            case 'max'
+      
+           if (strncmpi('max', input.PoolingType, 3) == 1)
                 z = max( abs(alpha), [], 2); % max pooling
-            case 'mss'
+           elseif (strncmpi('mss', input.PoolingType, 3) == 1)
                 z = sqrt(mean(alpha.^2, 2)); % mean squared statistics
-            case 'avg'
+           elseif (strncmpi('avg', input.PoolingType, 3) == 1)
                 z = mean(alpha, 2);          % average statistic
-            case 'abs'
+           elseif (strncmpi('abs', input.PoolingType, 3) == 1)
                 z = mean(abs(alpha), 2);     % mean absolute value
           end
           test_descr = [test_descr; z'];
