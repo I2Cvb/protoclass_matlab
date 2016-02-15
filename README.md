@@ -25,30 +25,24 @@ File Structure
 Installation
 ------------
 Installation is only required for some of the toolbox in the thir_party
+For those toolbox, follow the readme for each toolbox
+Note: 
+* RF_Class_C and RF_Class_R ---> change the mex path to your local mex path before compiling 
 
 ### Cloning
 
 You can clone this repository with the usual `git clone`.
 
-### Dependencies
+### protoclass 
 
-This package needs the following dependencies:
-
-* Numpy,
-* Scipy,
-* Scikit-learn,
-* Scikit-image,
-* UnbalancedDataset,
-* Pyksvd.
-
-The majority of the package are package which can be found in conda or pypi repositories.
-The packages not available are present as submodule in the folder `third-party`.
-To be able to install them, you need to:
-
-1. Initialise the submodule using `git submodule init` at the root of the repository.
-1. Download the source code using `git submodule update` at the root of the repository.
-1. Enter in each sub-repository and follow the install instructions.
-
-### Installation
-
-You need to run the command `python setup.py install`.
+```
+.
+├── preprocessing 
+	├── segmentation
+├── extraction (LBP. CLBP, GLCMaO, GLCMaD, SIFT, HoG, Gabor, Wavelat)
+	├── local and global feature extraction 
+	├── high-level (boW, ScF) and low-level 
+├── selection
+├── validation
+└── classification 
+```
