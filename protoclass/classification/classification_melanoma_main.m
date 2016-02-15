@@ -119,6 +119,24 @@
                 training_data = FV(Index,:); 
                 training_label = Labels(Index);
                 
+                
+                if (strncmpi('none', high_level_Id, 4) == 1)
+                    
+                    disp ([classifierId ' was chosen for classification'])
+                    
+                elseif (strncmpi('bow', high_level_Id, 4) == 1)
+                    
+                    disp ([classifierId ' and ' high_level_Id ' with ' num2str(nWords) ' was chosen for classification'])
+                     [Bow_model, training_data, testing_data] = Codebook_BoW (training_data, testing_data, nWords); 
+                     
+                elseif (strncmpi('scf', high_level_Id, 4) == 1)
+                    
+                    disp ([classifierId ' and ' high_level_Id ' with ' num2str(sLevel) ' and dictionary size of ' num2str(dSize)  ' was chosen for classification'])
+                    [params, training_data, testing_data] = Codebook_SCF (training_data, testing_data, 'dSize', 100); 
+
+                end 
+                
+                
                 %%% classification 
                 disp ([classifierId 'was chosen for classification'])
                 [pred_label(Id) pred_prob(Id)] = classification(training_data, training_label, testing_data, testing_label, classifierId , 'ntree', 50); 
