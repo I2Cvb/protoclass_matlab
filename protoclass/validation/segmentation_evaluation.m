@@ -3,8 +3,8 @@
 %%% Description: 
 %%% Author: Guillaume Lemaitre - Modjeh Rastgoo 
 %%% LE2I - ViCOROB
-%%% Date: 10 February 2014
-%%% Version: 0.1
+%%% Version: 0.1 - 10 February 2014
+%%% Version: 0.2 - 15 February 2016 
 %%% Copyright (c) 2014 Guillaume Lemaitre
 %%% http://le2i.cnrs.fr/ - http://vicorob.udg.es/
 %%% -----------------------------------------------------------------------
@@ -16,7 +16,9 @@
 %%%     - vec: vectors with the different statistics
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [vec] = mainEvaluation( Seg, GT )
+function [vec] = segmentation_evaluation( Seg, GT )
+
+addpath ../../validation/
 
 % Compute the Dice's coefficient
 dsc = diceCoefficient( Seg, GT );

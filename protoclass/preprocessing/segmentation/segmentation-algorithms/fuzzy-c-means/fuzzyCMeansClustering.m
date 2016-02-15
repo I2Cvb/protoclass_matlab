@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% File: levelSetSegmentation.m
+%%% File: fuzzyCMeansClustering.m
 %%% Description: This function allows to perform segmentation using fuzzy 
 %%% c-means.
 %%% Author: Guillaume Lemaitre - Mojdeh Rastgoo
@@ -10,12 +10,9 @@
 %%% http://le2i.cnrs.fr/ - http://vicorob.udg.es/
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [ segImg ] = levelSetSegmentation( rgbImg, colorSpace )
+function [ segImg ] = fuzzyCMeansClustering( rgbImg , colorSpace)
 
- addpath ../../../../../third_party/Basic_function/
- 
- 
- 
+addpath ../../../../../third_party/Basic_function/
 
 %%% Checking the requested color space 
  if (strncmpi('gray', colorSpace, 4) == 1)
@@ -63,51 +60,44 @@ elseif (strncmpi('h', colorSpace, 1) == 1) || (strncmpi('s', colorSpace, 1) == 1
     end
     
 end 
+    
+
+
+
+
 
 % Adjust the contrast
-I = mat2gray( imadjust( I ) ).*255;
+I = imadjust( I );
 
-% Size of the image
-[row, col] = size(I); 
 
-% Parameter of the level set
-A=255; % Maximum intensity
-nu=0.001*A^2; % coefficient of arc length term
-sigma = 4; % scale parameter that specifies the size of the neighborhood
-iter_outer=70; 
-iter_inner=20;   % inner iteration for level set evolution
-timestep=.1;
-mu=1;  % coefficient for distance regularization term (regularize the level set function)
-c0=2;
+% Apply Fuzzy C-means clustering
+data = I( : );
+[center,U,obj_fcn] = fcm(data,2);
 
-% Initialize level set function
-initialLSF = c0*ones(size(I));
-% The lesion is usually in the middle of the picture
-initialLSF (floor(row/2)-100:floor(row/2)+100 , floor(col/2)-150:floor(col/2)+150) = -c0; 
-u=initialLSF;
+% Find the cluster
+maxU = max(U);
+% Map each pixel to the most plausible outcome
+index1 = find(U(1,:) == maxU);
+index2 = find(U(2,:) == maxU);
 
-epsilon=1;
-b=ones(size(I));  %%% initialize bias field
-
-% Smooth the image to not stuck to the gradient so much
-K=fspecial('gaussian',round(2*sigma)*2+1,sigma); % Gaussian kernel
-%KI=conv2(I,K,'same');
-KONE=conv2(ones(size(I)),K,'same');
-
-% Level-set iteration
-for n=1:iter_outer
-    [u, b, ~]= lse_bfe(u,I, b, K,KONE, nu,timestep,mu,epsilon, iter_inner); 
-    disp([ 'Iteration #', num2str( n ), '/', num2str( iter_outer ) ] );
+% Affect to 1 the largest region
+if ( mean( data( index1 ) ) < mean( data( index2 ) ) )
+    tmp = index1;
+    index1 = index2;
+    index2 = tmp;
+    clear tmp;
 end
 
-% Threshold the final results
-segImg = u ; 
-segImg(u>=0.5) = 0; 
-segImg(u<0.5) = 1;
+% Initilisaton
+fcmImage( 1 : length( data ) )=0;       
+fcmImage( index1 )= 1;
+fcmImage( index2 )= 0;
 
-% Find the largest component and fill holes
+% Reshapeing the array to a image
+imagNew = reshape( fcmImage, size( I, 1 ), size( I, 2 ) );
 
-%%% Find the largest componenent
-[segImg, ~] = getLargestCc( logical( segImg ), 4, 1);
-%%% Fill holes just in case
+% Find the largest componenent
+[segImg statRegion] = getLargestCc( ~logical( imagNew ), 4, 1);
+
+% Fill holes just in case
 segImg = imfill( segImg, 'holes' );

@@ -1,5 +1,5 @@
-function [segImg] = pdfBasedSegmentation2( rgbImg )
-
+function [segImg] = pdfBasedSegmentation_( rgbImg )
+ addpath ../../../../../third_party/Basic_function/
 % Data Initialization
 cform = makecform('srgb2xyz');
 

@@ -10,13 +10,53 @@
 %%% http://le2i.cnrs.fr/ - http://vicorob.udg.es/
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [ segImg ] = fuzzyCMeansClustering( rgbIm )
+function [ segImg ] = fuzzyCMeansClustering( rgbImg , colorSpace)
 
-% Convert in XYZ colorspace
-I = rgb2xyz( rgbIm );
+addpath ../../../../../third_party/Basic_function/
 
-% Select only the Z channel
-I = I( :, :, 3 );
+%%% Checking the requested color space 
+if colorSpace == 'x' || colorSapce =='y' || colorSpace == 'z'
+    % Convert in XYZ colorspace
+    I = rgb2xyz( rgbIm );
+    if colorSpace == 'x'
+        I = I(:,:,1); 
+    elseif colorSpace == 'y'
+        I = I(:,:,2); 
+    elseif colorSpace == 'z'
+        I = I(:,:,3); 
+    end
+elseif colorSpace == 'r' || colorScape == 'g' || colorSpace == 'b'
+    % using rgb space of original image 
+
+    if colorSpace == 'r'
+        I = rgbImg(:,:,1); 
+    elseif colorSpace == 'g'
+        I = rgbImg(:,:,2); 
+    elseif colorSpace == 'b'
+        I = rgbImg(:,:,3); 
+    end
+elseif colorSpace == 'l' 
+    % La*b* color space 
+    I = colorspace ('Lab', rgbImg); 
+    I = I(:,:,1); 
+elseif colorSpace == 'h' || colorScape == 's' || colorSpace == 'v'
+    % HSV color space 
+    I = colorspace ('HSV',rgbImg ); 
+    
+    if colorSpace == 'h'
+        I = I(:,:,1); 
+    elseif colorSpace == 's'
+        I = I(:,:,2); 
+    elseif colorSpace == 'v'
+        I = I(:,:,3); 
+    end
+    
+end 
+    
+
+
+
+
 
 % Adjust the contrast
 I = imadjust( I );
