@@ -30,18 +30,18 @@ Img = im2double(Img);
 
     if (strncmpi('fcm', segId, 3) == 1)
         addpath segmentation-algorithms/fuzzy-c-means/ 
-        resPath = 'segmentation-algorithms/fuzzy-c-means/results' ; 
+        resPath = 'segmentation_algorithms/fuzzy_c_means/results' ; 
          [ segImg ] = fuzzyCMeansClustering( Img, input.colorSpace);
         
         
     elseif (strncmpi('ls', segId, 2) == 1)
         addpath segmentation-algorithms/level-set/ 
-        resPath = 'segmentation-algorithms/level-set/results' ; 
+        resPath = 'segmentation_algorithms/level_set/results' ; 
          [ segImg ] = levelSetSegmentation( Img, input.colorSpace );
         
     elseif (strncmpi('pdf', segId, 2) == 1)
         addpath segmentation-algorithms/pdf-based/ 
-        resPath = 'segmentation-algorithms/pdf-based/results' ; 
+        resPath = 'segmentation_algorithms/pdf_based/results' ; 
          [ segImg ] = pdfBasedSegmentation( Img, input.colorSpace);
         
     end

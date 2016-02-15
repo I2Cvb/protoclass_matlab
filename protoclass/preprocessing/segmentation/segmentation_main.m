@@ -40,7 +40,7 @@ end
 addpath ../../validation
 %%% Initialization and indication of datapaths
 path_gt = 'gt/';
-path_seg = 'segmentation-algorithms/'; 
+path_seg = 'segmentation_algorithms/'; 
 
 %%% This is an example fo evaluation of segmentation provided by three
 %%% algorithm 
@@ -64,11 +64,11 @@ for file = 1 : length( content_list )
             % reading GT 
             GT_img = imread(fullfile(path_gt, filename)); 
             % reading the fcm results 
-            fuzzy_seg = imread(fullfile(path_seg, 'fuzzy-c-means/results', filename)); 
+            fuzzy_seg = imread(fullfile(path_seg, 'fuzzy_c_means/results', filename)); 
             % reading the ls results 
-            LS_seg = imread(fullfile(path_seg, 'level-set/results', filename)); 
+            LS_seg = imread(fullfile(path_seg, 'level_set/results', filename)); 
             % reading the pdf-based results 
-            pdf_seg = imread(fullfile(path_seg, 'pdf-based/results', filename)); 
+            pdf_seg = imread(fullfile(path_seg, 'pdf_based/results', filename)); 
             
             
 

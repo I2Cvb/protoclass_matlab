@@ -20,6 +20,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function segImg = segmentation (Img, segId, varargin)
+addpath ../../../third_party/Basic_function/
 
 input.colorSpace = 'z'; 
 input.save_path = []; 
@@ -28,26 +29,26 @@ input = parseargs(input,varargin{:});
 Img = im2double(Img); 
 
     if (strncmpi('fcm', segId, 3) == 1)
-        addpath /segmentation-algorithms/fuzzy-c-means/ 
-        resPath = '/segmentation-algorithms/fuzzy-c-means/results' ; 
+        addpath segmentation-algorithms/fuzzy-c-means/ 
+        resPath = 'segmentation-algorithms/fuzzy-c-means/results' ; 
          [ segImg ] = fuzzyCMeansClustering( Img, input.colorSpace);
         
         
     elseif (strncmpi('ls', segId, 2) == 1)
-        addpath /segmentation-algorithms/fuzzy-c-means/ 
-        resPath = '/segmentation-algorithms/level-set/results' ; 
+        addpath segmentation-algorithms/level-set/ 
+        resPath = 'segmentation-algorithms/level-set/results' ; 
          [ segImg ] = levelSetSegmentation( Img, input.colorSpace );
         
     elseif (strncmpi('pdf', segId, 2) == 1)
-        addpath /segmentation-algorithms/fuzzy-c-means/ 
-        resPath = '/segmentation-algorithms/pdf-based/results' ; 
+        addpath segmentation-algorithms/pdf-based/ 
+        resPath = 'segmentation-algorithms/pdf-based/results' ; 
          [ segImg ] = pdfBasedSegmentation( Img, input.colorSpace);
         
     end
     
     
     if (isempty(input.save_path) ~= 0 )
-        imwrite(fullfile(resPath, input.savepath))
-        save(fullfile(resPath, input.save_path), 'segImg'); 
+        imwrite(segImg, fullfile(resPath, [input.savepath '.png']) , 'png'); 
+        
     end 
     

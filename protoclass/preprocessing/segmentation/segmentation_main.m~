@@ -74,13 +74,13 @@ for file = 1 : length( content_list )
 
             % Make the evaluation for this image
             disp( [ 'Evaluation of ', filename, ' - Fuzzy C-Means vs. GT' ] );
-            fuzzy_stat = mainEvaluation( fuzzy_seg, GT_img );
+            fuzzy_stat = segmentation_evaluation( fuzzy_seg, GT_img );
             pause;
             disp( [ 'Evaluation of ', filename, ' - Level Set vs. GT' ] );
-            LS_stat= mainEvaluation( fuzzy_seg, GT_img );
+            LS_stat= segmentation_evaluation( fuzzy_seg, GT_img );
             pause;
             disp( [ 'Evaluation of ', filename, ' - pdf-based vs. GT' ] );
-            pdf_based_stat= mainEvaluation( fuzzy_seg, GT_img );
+            pdf_based_stat= segmentation_evaluation( fuzzy_seg, GT_img );
             pause;
       
         end

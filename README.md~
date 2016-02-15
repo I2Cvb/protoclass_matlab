@@ -16,15 +16,15 @@ File Structure
 ```
 .
 ├── doc
-├── data
+├── LICENSE
 ├── protoclass
 ├── README.md
+├── setup.py
 └── third-party
 ```
 
 Installation
 ------------
-Installation is only required for some of the toolbox in the thir_party
 
 ### Cloning
 
