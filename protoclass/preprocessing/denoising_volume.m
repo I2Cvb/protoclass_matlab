@@ -17,16 +17,18 @@ function [ out_vol ] = denoising_volume( in_vol, method, varargin )
 
     % Check that the input is a volume
     if size(size(in_vol)) ~= 3
-        error(['The input matrix should be a volume.']);
+        error('denoising_volume:InputMustBe3D', ['The input matrix ' ...
+                            'should be a volume.']);
     end
 
-    if method == 'bm3d'
+    if strcmp(method, 'bm3d')
         % Get the value of sigma
-        sigma = varargin(1);
+        sigma = varargin{1};
         % Call the appropriate function
         out_vol = denoising_volume_bm3d( in_vol, sigma )
     else
-        error(['Method not implemented.']);
+        error('denoising_volume:NotImplemented', ['The method required ' ...
+                            'is not implemented']);
     end
 end
 
@@ -36,13 +38,15 @@ function [ out_vol ] = denoising_volume_bm3d( in_vol, sigma )
     if isfloat( in_vol )
         % Check that the value are between 0. and 1.
         if ( ( max(in_vol(:)) > 1. ) || ( min(in_vol(:)) < 0. ) )
-            error(['Volume of type float with value out of range. Need to ' ...
-                   'scale between 0. and 1.'])
+            error('denoising_volume_bm3d:FloatRangeError', ['Volume ' ...
+                                'of type float with value out of ' ...
+                                'range. Need to scale between 0. and 1.']);
         end
         % Check the value of sigma
         if ( ( sigma > 1. ) || ( sigma < 0. ) )
-            error(['The image data are in the range between 0.0 and ' ...
-                   '1.0. sigma need to be in the same range.']);
+            error('denoising_volume_bm3d:SigmaNotInRange', ['The ' ...
+                                'image data are in the range between ' ...
+                                '0.0 and 1.0. sigma need to be in the same range.']);
         else
             % From the BM3D toolbox, sigma need to be scale between
             % 0 and 255
