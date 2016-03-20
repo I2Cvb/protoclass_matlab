@@ -1,4 +1,36 @@
-function [ out_vol ] = denoising_volume( in_vol, sigma )
+function [ out_vol ] = denoising_volume( in_vol, method, varargin )
+% DENOISING_VOLUME Function to denoise a 3D volume.
+%     out_vol = denoising_volume( in_vol, method ) denoises the
+%     volume using the method given.
+%
+% Required arguments:
+%     in_vol: 3-dimensional matrix with the noisy volume
+%     method: the method used to denoise. Can be any of: 'bm3d'
+%
+% 'bm3d' method:
+%     out_vol = denoising_volume( in_vol, 'bm3d', sigma )
+%     sigma: check the bm3d documentation
+%
+% Return:
+%     out_vol: 3-dimensional matrix with the denoised volume
+%
+
+    % Check that the input is a volume
+    if size(size(in_vol)) ~= 3
+        error(['The input matrix should be a volume.']);
+    end
+
+    if method == 'bm3d'
+        % Get the value of sigma
+        sigma = varargin(1);
+        % Call the appropriate function
+        out_vol = denoising_volume_bm3d( in_vol, sigma )
+    else
+        error(['Method not implemented.']);
+    end
+end
+
+function [ out_vol ] = denoising_volume_bm3d( in_vol, sigma )
 
     % Check the input type
     if isfloat( in_vol )
@@ -30,17 +62,15 @@ function [ out_vol ] = denoising_volume( in_vol, sigma )
     out_vol = zeros( size(in_vol) );
     parfor sl = 1 : size(in_vol, 3)
         if sl <= size(in_vol, 3)
-            out_vol(:, :, sl) = denoising_image( in_vol(:, :, sl), sigma );
+            out_vol(:, :, sl) = denoising_image_bm3d( in_vol(:, :, sl), sigma );
         end
     end
 
 end
 
-function [ Oimg ] = denoising_image( Iimg, sigma )
+function [ Oimg ] = denoising_image_bm3d( Iimg, sigma )
 
-    % Add BM3D dependency
-    addpath('../../../../third-party/BM3D');
-    
     % Apply the BM3D filter
     [t, Oimg] = BM3D(1, Iimg, sigma);
+
 end

@@ -1,4 +1,34 @@
-function [ baseline_vol, warped_vol ] = flattening_volume( in_vol )
+function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method )
+% FLATTENING_VOLUME Function to flatten a 3D volume.
+%     out_vol = flattening_volume( in_vol, method ) flattens the
+%     volume using the method given.
+%
+% Required arguments:
+%     in_vol: 3-dimensional matrix with the input volume
+%     method: the method used to flatten. Can be any of: 'srinivisan-2014'
+%
+% 'srinivisan-2014' method:
+%     out_vol = flattening_volume( in_vol, 'srinivisan-2014' )
+%
+% Return:
+%     out_vol: 3-dimensional matrix with the flattened volume
+%
+
+   % Check that the input is a volume
+    if size(size(in_vol)) ~= 3
+        error(['The input matrix should be a volume.']);
+    end
+
+    if method == 'srinivisan-2014'
+        % Call the appropriate function
+        out_vol = flattening_volume_srinivasan( in_vol )
+    else
+        error(['Method not implemented.']);
+    end
+end
+
+
+function [ baseline_vol, warped_vol ] = flattening_volume_srinivasan( in_vol )
 
     % We will make a parallel processing
     % Pre-allocate the volume
@@ -6,16 +36,14 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol )
     baseline_vol = zeros( size(in_vol, 3) );
     for sl = 1 : size(in_vol, 3)
         if sl <= size(in_vol, 3)
-            [ baseline_vol(sl), warped_vol(:, :, sl) ] = flattening_image( in_vol(:, :, sl) );
+            [ baseline_vol(sl), warped_vol(:, :, sl) ] = flattening_image_srinivasan( in_vol(:, :, sl) );
         end
     end
 
 end
 
 
-function [ baseline_y, warped_img ] = flattening_image( in_img )
-
-    addpath('../util');
+function [ baseline_y, warped_img ] = flattening_image_srinivasan( in_img )
 
     % Find the indexes of the first maximum
     [~, idx_max_1] = max( in_img );
