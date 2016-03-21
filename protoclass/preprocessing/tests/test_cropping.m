@@ -75,7 +75,7 @@ function test_crop_srinivisan_2014(testCase)
                           h_under_rpe, width_crop);
 
     % Verify that the volume is what we are expecting
-    load('vol_crop_srinivasan_2014.mat');
+    load('./data/vol_crop_srinivasan_2014.mat');
     verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10);
 end
 

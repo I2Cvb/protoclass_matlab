@@ -6,7 +6,7 @@ function [ out_vol ] = crop_volume( in_vol, method, varargin )
 % Required arguments:
 %     in_vol : 3d-array
 %         Entire volume
-%     method : 
+%     method : string
 %         Method used to crop the volume. Can be any of: 'srinivasan-2014'
 %
 % 'srinivisan-2014' method:

@@ -119,6 +119,6 @@ function test_volume_bm3d_with_int(testCase)
     vol_out = denoising_volume(vol(:, :, 1:4), method, sigma);
 
     % Verify that the volume is what we are expecting
-    load('vol_out_bm3d_int.mat');
+    load('./tests/vol_out_bm3d_int.mat');
     verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10);
 end
