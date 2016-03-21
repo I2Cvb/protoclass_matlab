@@ -22,6 +22,21 @@ function test_volume_is_3d(testCase)
                                              sigma), 'denoising_volume:InputMustBe3D');
 end
 
+function test_volume_narg_incorrect(testCase)
+% TEST_VOLUME_NARG_INCORRECT Test either if an error is raised when
+% the wrong number of parameter is incorrect
+
+    % Method of bm3d
+    % Read the volume
+    vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
+
+    % Denoise the volume using BM3D
+    method = 'bm3d';
+    % Check that an error is thrown if not a 3d matrix if given
+    testCase.verifyError(@()denoising_volume(vol, method), ...
+                         'denoising_volume:NArgInIncorrect');
+end
+
 function test_volume_method_not_implemented(testCase)
 % TEST_VOLUME_METHOD_NOT_IMPLEMENTED Test either if an error is
 % raised if the method required is not implemented
@@ -47,6 +62,10 @@ function test_volume_bm3d_float_range(testCase)
     method = 'bm3d';
     sigma = .2;
     % Check that an error is thrown if not a 3d matrix if given
+    testCase.verifyError(@()denoising_volume(vol, method, sigma), ...
+                         'denoising_volume_bm3d:FloatRangeError');
+    % Check if it grab when smaller than 0
+    vol = max(vol(:)) - vol;
     testCase.verifyError(@()denoising_volume(vol, method, sigma), ...
                          'denoising_volume_bm3d:FloatRangeError');
 end
@@ -78,14 +97,12 @@ function test_volume_bm3d_with_float(testCase)
     % Denoise the volume using BM3D
     method = 'bm3d';
     sigma = .2;
-    vol_out = denoising_volume(vol, method, sigma);
+    % Give only the first 4 slides
+    vol_out = denoising_volume(vol(:, :, 1:4), method, sigma);
     
-    vol_gt = vol_out
-    save('vol_out_float.mat', 'vol_gt');
-
-    % % Verify that the volume is what we are expecting
-    % vol_gt = load('PCS57635OS_denoised_bm3d.img')
-    % verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10)
+    % Verify that the volume is what we are expecting
+    load('vol_out_bm3d_float.mat');
+    verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10);
 end
 
 function test_volume_bm3d_with_int(testCase)
@@ -93,17 +110,15 @@ function test_volume_bm3d_with_int(testCase)
 % float data
 
     % Read the volume
-    vol = int(read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024));
+    vol = uint8(read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024));
 
     % Denoise the volume using BM3D
     method = 'bm3d';
     sigma = 190;
-    vol_out = denoising_volume(vol, method, sigma);
-    
-    vol_gt = vol_out
-    save('vol_out_int.mat', 'vol_gt');
+    % Give only the first 4 slides
+    vol_out = denoising_volume(vol(:, :, 1:4), method, sigma);
 
-    % % Verify that the volume is what we are expecting
-    % vol_gt = load('PCS57635OS_denoised_bm3d.img')
-    % verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10)
+    % Verify that the volume is what we are expecting
+    load('vol_out_bm3d_int.mat');
+    verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10);
 end

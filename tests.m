@@ -9,8 +9,9 @@ setup;
 % Call the different test
 
 % Pre-processing tests
-preprocessing_folder=fullfile(pwd, 'protoclass/preprocessing/tests');
-suite = matlab.unittest.TestSuite.fromFolder(preprocessing_folder);
+preprocessing_folder=fullfile(pwd, 'protoclass/preprocessing');
+suite = matlab.unittest.TestSuite.fromFolder(fullfile(preprocessing_folder, ...
+                                                  'tests'));
 runner = TestRunner.withTextOutput;
 runner.addPlugin(CodeCoveragePlugin.forFolder(preprocessing_folder));
 result = runner.run(suite);

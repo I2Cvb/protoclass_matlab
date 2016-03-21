@@ -4,8 +4,10 @@ function [ out_vol ] = denoising_volume( in_vol, method, varargin )
 %     volume using the method given.
 %
 % Required arguments:
-%     in_vol: 3-dimensional matrix with the noisy volume
-%     method: the method used to denoise. Can be any of: 'bm3d'
+%     in_vol: 3d-array
+%         Noisy volume
+%     method: string
+%         Method used to denoise. Can be any of: 'bm3d'
 %
 % 'bm3d' method:
 %     out_vol = denoising_volume( in_vol, 'bm3d', sigma )
@@ -22,10 +24,15 @@ function [ out_vol ] = denoising_volume( in_vol, method, varargin )
     end
 
     if strcmp(method, 'bm3d')
+        % Check that you have the right amount of parameters
+        if nargin ~= 3
+            error('denoising_volume:NArgInIncorrect', ['The number ' ...
+                                'of arguments is incorrect']);
+        end
         % Get the value of sigma
         sigma = varargin{1};
         % Call the appropriate function
-        out_vol = denoising_volume_bm3d( in_vol, sigma )
+        out_vol = denoising_volume_bm3d( in_vol, sigma );
     else
         error('denoising_volume:NotImplemented', ['The method required ' ...
                             'is not implemented']);
@@ -55,7 +62,7 @@ function [ out_vol ] = denoising_volume_bm3d( in_vol, sigma )
     elseif isinteger( in_vol )
         
         % Divide sigma by the maximum value of the image
-        sigma = float( sigma );
+        sigma = double( sigma );
 
         % Convert the data to floating number
         in_vol = im2double( in_vol );

@@ -1,4 +1,56 @@
-function [ out_vol ] = crop_volume( in_vol, basline_vol, h_over_rpe, h_under_rpe, width)
+function [ out_vol ] = crop_volume( in_vol, method, varargin )
+% CROP_VOLUME Function to crop a 3D volume.
+%     out_vol = denoising_volume( in_vol, method ) crop the
+%     volume using the given method.
+%
+% Required arguments:
+%     in_vol : 3d-array
+%         Entire volume
+%     method : 
+%         Method used to crop the volume. Can be any of: 'srinivasan-2014'
+%
+% 'srinivisan-2014' method:
+%     baseline_vol : int
+%         Level of the RPE.
+%     h_over_rpe : int
+%         Height to crop above the RPE.
+%     h_under_rpe : int
+%         Height to crop below the RPE.
+%     width : int
+%         Width to crop. The cropping will take place at the
+%         center.
+%
+% Return:
+%     out_vol: 3-dimensional matrix with the cropped volume
+%
+
+    % Check that the input is a volume
+    if size(size(in_vol)) ~= 3
+        error('crop_volume:InputMustBe3D', ['The input matrix ' ...
+                            'should be a volume.']);
+    end
+
+    if strcmp(method, 'srinivasan-2014')
+        % Check that the number of arguments is correct
+        if nargin ~= 6
+            error('crop_volume:NArgInIncorrect', ['The number ' ...
+                                'of arguments is incorrect']);
+        end
+        % Get the value of sigma
+        baseline_vol = varargin{1};
+        h_over_rpe = varargin{2};
+        h_under_rpe = varargin{3};
+        width = varargin{4};
+        % Call the appropriate function
+        out_vol = crop_volume_srinivasan_2014( in_vol, baseline_vol, h_over_rpe, h_under_rpe, width );
+    else
+        error('crop_volume:NotImplemented', ['The method required ' ...
+                            'is not implemented']);
+    end
+
+end
+
+function [ out_vol ] = crop_volume_srinivasan_2014( in_vol, baseline_vol, h_over_rpe, h_under_rpe, width)
 
     % We will make a parallel processing
     % Pre-allocate the volume
@@ -15,8 +67,8 @@ function [ out_vol ] = crop_volume( in_vol, basline_vol, h_over_rpe, h_under_rpe
 
     parfor sl = 1 : size(in_vol, 3)
         if (sl <= size(in_vol, 3) ) || ( sl <= lentgh( baseline_vol ) )
-            out_vol(:, :, sl) = crop_image( in_vol(:, :, sl), ...
-                                            basline_vol(sl), ...
+            out_vol(:, :, sl) = crop_image_srinivasan_2014( in_vol(:, :, sl), ...
+                                            baseline_vol(sl), ...
                                             h_over_rpe, ...
                                             h_under_rpe, ...
                                             width );
@@ -25,25 +77,27 @@ function [ out_vol ] = crop_volume( in_vol, basline_vol, h_over_rpe, h_under_rpe
 
 end
 
-function [ out_img ] = crop_image( in_img, baseline_img, h_over_rpe, h_under_rpe, width)
+function [ out_img ] = crop_image_srinivasan_2014( in_img, baseline_img, h_over_rpe, h_under_rpe, width)
 
     % Check that the dimension parameters are meaningful
     if ( h_over_rpe < 0 ) || ( h_under_rpe < 0 ) || ( width < 0 ) || ( width > size(in_img, 2) )
-        error(['The dimension given to crop the image are inconsistent.']);
+        error('crop_volume:CropSizeWrong', ['The dimension given ' ...
+                            'to crop the image are inconsistent.']);
     end
     % Check that the dimension allow a cropping
     if ( ( baseline_img - h_over_rpe ) <= 0 ) || ( ( baseline_img + ...
                                                     h_under_rpe ) > ...
                                                   size(in_img, 1) )
-        warning(['The cropping area will not be based on the baseline ' ...
+        warning('crop_volume:ModifyCropSize', ['The cropping area will not be based on the baseline ' ...
                  'due to cropping area constraints. Everything will ' ...
                  'go smooth.'])
         if ( baseline_img - h_over_rpe ) <= 0
-            h_under_rpe = h_over_rpe - baseline_img - 1 + h_under_rpe
-            h_over_rpe = baseline_img - 1
+            h_under_rpe = h_over_rpe - baseline_img + h_under_rpe + ...
+                1;
+            h_over_rpe = baseline_img - 1;
         elseif ( baseline_img + h_under_rpe ) > size(in_img, 1)
-            h_over_rpe = h_over_rpe + h_under_rpe - size(in,img, 1) - baseline
-            h_under_rpe = size(in,img, 1) - baseline
+            h_over_rpe = h_over_rpe + h_under_rpe - size(in_img, 1) + baseline_img;
+            h_under_rpe = size(in_img, 1) - baseline_img;
         end
     end
 
