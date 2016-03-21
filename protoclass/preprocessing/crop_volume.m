@@ -4,24 +4,29 @@ function [ out_vol ] = crop_volume( in_vol, method, varargin )
 %     volume using the given method.
 %
 % Required arguments:
-%     in_vol : 3d-array
-%         Entire volume
+%     in_vol : 3D array
+%         Entire volume.
+%
 %     method : string
 %         Method used to crop the volume. Can be any of: 'srinivasan-2014'
 %
 % 'srinivisan-2014' method:
 %     baseline_vol : int
 %         Level of the RPE.
+%
 %     h_over_rpe : int
 %         Height to crop above the RPE.
+%
 %     h_under_rpe : int
 %         Height to crop below the RPE.
+%
 %     width : int
 %         Width to crop. The cropping will take place at the
 %         center.
 %
 % Return:
-%     out_vol: 3-dimensional matrix with the cropped volume
+%     out_vol: 3D array 
+%         Cropped volume.
 %
 
     % Check that the input is a volume

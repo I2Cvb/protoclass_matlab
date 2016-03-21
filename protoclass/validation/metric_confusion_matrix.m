@@ -1,5 +1,44 @@
 function [ sens, spec, prec, npv, acc, f1s, mcc, gmean, cm ] = metric_confusion_matrix( pred_label, true_label )
-
+% METRIC_CONFUSION_MATRIX Function to compute the confusion matrix
+% of a classification experiments and the associated metrics.
+%     [ sens, spec, prec, npv, acc, f1s, mcc, gmean, cm ] =
+%     metric_confusion_matrix( pred_label, true_label )
+%
+% Required arguments:
+%     pred_label : 1D array, shape (n_samples, 1)
+%         Labels predicted by the classifier experimented.
+%
+%     true_label : 1D array, shape (n_samples, 1)
+%         Ground-truth labels.
+%
+% Return:
+%     sens: double
+%          Sensitivity.
+%
+%     spec: double
+%          Specificity.
+%
+%     prec: double
+%          Precision.
+%
+%     npv: double
+%          Negative predictive value.
+%
+%     acc: double
+%          Accuracy.
+%
+%     f1s: double
+%          F1 score.
+%
+%     mcc: double
+%          Matthew's correlation coefficient.
+%
+%     gmean: double
+%          Geometric mean.
+%
+%     cm: 2D array, shape (n_classes, n_classes)
+%          Confusion matrix.
+%
     % Compute the confusion matrix
     cm = confusionmat( true_label, pred_label, 'order', [-1 1]);
 

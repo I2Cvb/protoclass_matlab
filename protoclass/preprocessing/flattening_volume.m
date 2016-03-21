@@ -4,8 +4,9 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
 %     volume using the method given.
 %
 % Required arguments:
-%     in_vol: 3d-array
-%         Entire volume
+%     in_vol: 3D array
+%         Entire volume.
+%
 %     method: string
 %         Method used to flatten. Can be any of: 'srinivasan-2014'
 %
@@ -13,7 +14,8 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
 %     No arguments to be specified.
 %
 % Return:
-%     out_vol: 3-dimensional matrix with the flattened volume
+%     out_vol: 3D array
+%         Flattened volume.
 %
 
    % Check that the input is a volume

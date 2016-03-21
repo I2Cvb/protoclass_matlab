@@ -6,15 +6,18 @@ function [oct_volume] = read_oct_volume(iname, X, Y, Z)
 % Required arguments:
 %     iname: string
 %         Filename of the IMG file.
+%
 %     X : int
 %         X dimension.
+%
 %     Y : int
 %         Y dimension.
+%
 %     Z : int
 %         Z dimension.
 %
 % Return:
-%     out_vol: 3d-array, shape (Z, X, Y)
+%     out_vol: 3D array, shape (Z, X, Y)
 %         OCT volume.
 %
 

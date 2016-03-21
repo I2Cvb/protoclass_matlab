@@ -4,18 +4,18 @@ function [ out_vol ] = denoising_volume( in_vol, method, varargin )
 %     volume using the method given.
 %
 % Required arguments:
-%     in_vol: 3d-array
-%         Noisy volume
+%     in_vol: 3D array
+%         Noisy volume.
+%
 %     method: string
 %         Method used to denoise. Can be any of: 'bm3d'
 %
 % 'bm3d' method:
-%     out_vol = denoising_volume( in_vol, 'bm3d', sigma )
-%     sigma: check the bm3d documentation
+%     sigma: check the bm3d documentation.
 %
 % Return:
-%     out_vol: 3d-array
-%         Denoised volume
+%     out_vol: 3D array
+%         Denoised volume.
 %
 
     % Check that the input is a volume
