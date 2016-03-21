@@ -14,7 +14,7 @@ function test_flattening_is_3d(testCase)
     % Read the volume
     vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
 
-    % Crop the volume using srinivisan
+    % Crop the volume using Srinivasan 2014
     method = 'srinivasan-2014';
     % Check that an error is thrown if not a 3d matrix if given
     testCase.verifyError(@()flattening_volume(vol(:, :, 1), method), ...
@@ -23,15 +23,15 @@ end
 
 function test_flattening_narg_incorrect(testCase)
 % TEST_FLATTENING_NARG_INCORRECT Test either if an error is raised when
-% the wrong number of parameter is incorrect
+% the number of parameters is incorrect
 
     % Read the volume
     vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
 
-    % Crop the volume using srinivisan
+    % Flatten the volume using Srinivasan 2014
     method = 'srinivasan-2014';
     rndarg = 1;
-    % Check that an error is thrown if not a 3d matrix if given
+    % Check when the number of parameters is wrong
     testCase.verifyError(@()flattening_volume(vol, method, rndarg), ...
                          'flattening_volume:NArgInIncorrect');
 
@@ -44,9 +44,8 @@ function test_flattening_method_not_implemented(testCase)
     % Read the volume
     vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
 
-    % Crop the volume
+    % Flatten the volume
     method = 'random';
-    % Check that an error is thrown if not a 3d matrix if given
     testCase.verifyError(@()flattening_volume(vol, method), ...
                          'flattening_volume:NotImplemented');
 end
@@ -57,10 +56,10 @@ function test_flattening_srinivisan_2014(testCase)
     % Read the volume
     vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
 
-    % Crop the volume using BM3D
+    % Flatten the volume using BM3D
     method = 'srinivasan-2014';
 
-    % Crop the volume on 4 first images
+    % Flatten the volume on 4 first images
     [baseline_vol, warped_vol] = flattening_volume(vol(:, :, 1:4), method);
 
     % Verify that the volume is what we are expecting
