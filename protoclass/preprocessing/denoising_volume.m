@@ -14,7 +14,8 @@ function [ out_vol ] = denoising_volume( in_vol, method, varargin )
 %     sigma: check the bm3d documentation
 %
 % Return:
-%     out_vol: 3-dimensional matrix with the denoised volume
+%     out_vol: 3d-array
+%         Denoised volume
 %
 
     % Check that the input is a volume

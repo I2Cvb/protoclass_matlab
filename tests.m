@@ -15,3 +15,10 @@ suite = matlab.unittest.TestSuite.fromFolder(fullfile(preprocessing_folder, ...
 runner = TestRunner.withTextOutput;
 runner.addPlugin(CodeCoveragePlugin.forFolder(preprocessing_folder));
 result = runner.run(suite);
+% Util tests
+util_folder=fullfile(pwd, 'protoclass/util');
+suite = matlab.unittest.TestSuite.fromFolder(fullfile(util_folder, ...
+                                                  'tests'));
+runner = TestRunner.withTextOutput;
+runner.addPlugin(CodeCoveragePlugin.forFolder(util_folder));
+result = runner.run(suite);

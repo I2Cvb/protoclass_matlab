@@ -1,16 +1,37 @@
 function [oct_volume] = read_oct_volume(iname, X, Y, Z)
-% read the OCT volume stored in the file iname (here *.img)
-% X, Y and Z are the images parameters
-% in our case: X = 512, Y= 128, Z = 1024; means each volume contains 128
-% B-scan, each of dimension X=512 and Z=1024
-% the intensity value of each pixel is stored as unsigned 8-bit
+% READ_OCT_VOLUME Function to read an OCT volume from IMG format.
+%     [oct_volume] = read_oct_volume(iname, X, Y, Z) load inside 3D
+%     matrix the data of the IMG file.
 %
-% D. SIDIBE, April 8th, 2015
+% Required arguments:
+%     iname: string
+%         Filename of the IMG file.
+%     X : int
+%         X dimension.
+%     Y : int
+%         Y dimension.
+%     Z : int
+%         Z dimension.
+%
+% Return:
+%     out_vol: 3d-array, shape (Z, X, Y)
+%         OCT volume.
+%
 
-oct_volume = zeros(Z, X, Y);
-fin = fopen(iname,'r');
-for i=1:Y
-    I = fread(fin, [X,Z],'ubit8=>uint8'); 
-    oct_volume(:, :, i) = imrotate(I, 90);
+    % Extract the extension from the filename
+    [~, ~, ext] = fileparts(iname);
+
+    if strcmp(ext, '.img')
+        oct_volume = zeros(Z, X, Y);
+        fin = fopen(iname,'r');
+        for i = 1 : Y
+            I = fread(fin, [X, Z],'ubit8=>uint8'); 
+            oct_volume(:, :, i) = imrotate(I, 90);
+        end
+        fclose(fin);
+    else
+        error('read_oct_volume:NotImplemented', ['The format ', ...
+                            ext, 'is not supported currently.']);
+    end
+
 end
-fclose(fin);
