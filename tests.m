@@ -22,3 +22,10 @@ suite = matlab.unittest.TestSuite.fromFolder(fullfile(util_folder, ...
 runner = TestRunner.withTextOutput;
 runner.addPlugin(CodeCoveragePlugin.forFolder(util_folder));
 result = runner.run(suite);
+% Validation tests
+validation_folder=fullfile(pwd, 'protoclass/validation');
+suite = matlab.unittest.TestSuite.fromFolder(fullfile(validation_folder, ...
+                                                  'tests'));
+runner = TestRunner.withTextOutput;
+runner.addPlugin(CodeCoveragePlugin.forFolder(validation_folder));
+result = runner.run(suite);
