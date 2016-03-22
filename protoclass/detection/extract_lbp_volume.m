@@ -1,9 +1,38 @@
 function [ feature_mat_vol ] = extract_lbp_volume( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, Upright )
+% EXTRACT_LBP_VOLUME Function to extract LBP descriptor from a
+% volume using a pyramidal approach
+%     [ feature_mat_vol ] = extract_lbp_volume( in_vol,
+%     pyr_num_lev, NumNeighbors, Radius, CellSize, Upright ) 
+%
+% Required arguments:
+%     in_vol : 3D array
+%         Entire volume.
+%
+%     pyr_num_lev : int
+%         The number of level in the pyramid.
+%
+%     NumNeighbors : int
+%         Number of neighbors.
+%
+%     Radius : int
+%         Radius of circular pattern to select neighbors.
+%
+%     CellSize : vector
+%          Cell size.
+%
+%     Upright : bool
+%          Rotation invariant flag.
+%
+% Return:
+%     feature_mat_vol : 2D array 
+%         Feature matrix
+%
 
     % Check the number of level in the pyramid is meaningful
     if pyr_num_lev < 0
-        error(['The level in the pyramid cannot be 0 or less.']);
-    end
+        error('extract_lbp_volume:IncorrectNumPyr', ['The level in ' ...
+                            'the pyramid cannot be 0 or less.']);
+    end 
     % Compute the size of the descriptor
     feat_dim = 0;
     for lev = 0:pyr_num_lev - 1
