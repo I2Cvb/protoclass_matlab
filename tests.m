@@ -7,7 +7,13 @@ import matlab.unittest.plugins.CodeCoveragePlugin
 setup;
 
 % Call the different test
-
+% Detection tests
+detection_folder=fullfile(pwd, 'protoclass/detection');
+suite = matlab.unittest.TestSuite.fromFolder(fullfile(detection_folder, ...
+                                                  'tests'));
+runner = TestRunner.withTextOutput;
+runner.addPlugin(CodeCoveragePlugin.forFolder(detection_folder));
+result = runner.run(suite);
 % Pre-processing tests
 preprocessing_folder=fullfile(pwd, 'protoclass/preprocessing');
 suite = matlab.unittest.TestSuite.fromFolder(fullfile(preprocessing_folder, ...

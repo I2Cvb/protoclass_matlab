@@ -1,8 +1,37 @@
 function [ feature_mat_vol ] = extract_hog_volume( in_vol, pyr_num_lev, CellSize, BlockSize, BlockOverlap, NumBins )
+% EXTRACT_HOG_VOLUME Function to extract HOG descriptor from a
+% volume using a pyramidal approach
+%     [ feature_mat_vol ] = extract_hog_volume( in_vol,
+%     pyr_num_lev, CellSize, BlockSize, BlockOverlap, NumBins ) 
+%
+% Required arguments:
+%     in_vol : 3D array
+%         Entire volume.
+%
+%     pyr_num_lev : int
+%         The number of level in the pyramid.
+%
+%     CellSize : vector
+%         Size of HOG cell.
+%
+%     BlockSize : vector
+%         Number of cells in block.
+%
+%     BlockOverlap : int
+%          Number of overlapping celss between adjacent blocks.
+%
+%     NumBins : int
+%          Number of orientation histogram bins.
+%
+% Return:
+%     feature_mat_vol : 2D array 
+%         Feature matrix
+%
 
     % Check the number of level in the pyramid is meaningful
     if pyr_num_lev < 0
-        error(['The level in the pyramid cannot be 0 or less.']);
+        error('extract_hog_volume:IncorrectNumPyr', ['The level in ' ...
+                            'the pyramid cannot be 0 or less.']);
     end
     % Compute the size of the descriptor
     feat_dim = 0;
