@@ -1,6 +1,6 @@
-function [ feature_mat_vol ] = extract_lbp_volume( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, Upright )
-% EXTRACT_LBP_VOLUME Function to extract LBP descriptor from a
-% volume using a pyramidal approach
+function [ feature_mat_vol ] = extract_lbp_volume_p( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, Upright )
+% EXTRACT_LBP_VOLUME_P Function to extract LBP descriptor from a
+% volume using a pyramidal (p) approach
 %     [ feature_mat_vol ] = extract_lbp_volume( in_vol,
 %     pyr_num_lev, NumNeighbors, Radius, CellSize, Upright ) 
 %
@@ -100,7 +100,7 @@ function [ feature_vec_img ] = extract_lbp_image( in_img, pyr_num_lev, NumNeighb
                 im_rsz = impyramid(im_rsz, 'reduce');
             end
         end
-        % Compute the HOG feature
+        % Compute the LBP feature
         feature_vec_img( cum_feat_dim(lev) + 1 : cum_feat_dim(lev + 1) ) = ...
             extractLBPFeatures(im_rsz, 'NumNeighbors', NumNeighbors, ...
                                'Radius', Radius, 'CellSize', CellSize, ...
