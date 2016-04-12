@@ -202,7 +202,7 @@ function [ feature_vec_img ] = extract_lbp_image_sp( in_img, pyr_num_lev, NumNei
         X = X(:); Y = Y(:); 
         
         for sbId = 1 : length(X)
-            im_rsz_sb = im_rsz(xstrIdx(X(sbId)): xendIdx(X(sbId)), ystrIdx(X(sbId)): yendIdx(X(sbId))); 
+            im_rsz_sb = im_rsz(xstrIdx(X(sbId)): xendIdx(X(sbId)), ystrIdx(Y(sbId)): yendIdx(Y(sbId))); 
             
             % Compute the LBP feature
             feature_vec_img_lev(((sbId-1)*feat_desc_dim)+1 : sbId * feat_desc_dim)  = lbp(im_rsz_sb, Radius, NumNeighbors, Map, MODE );
