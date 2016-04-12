@@ -1,4 +1,4 @@
-function [edge_vol ] = extract_edge_volume( in_vol, Method, Threshold)
+function [edge_vol ] = extract_edge_volume( in_vol, method, varargin)
 % EXTRACT_EDGE_VOLUME Function to extract edges from spatial blocks within the images of the
 % volume considering different levels of pyramid
 %     [ feature_mat_vol ] = extract_edge( in_vol,
@@ -10,6 +10,7 @@ function [edge_vol ] = extract_edge_volume( in_vol, Method, Threshold)
 %     Method : string
 %         The name of edge detection method {'canny', 'sobel', ....}.
 %
+% optional arguments : 
 %     Threshold: int 
 %         default = 0 , if mentioned this value will be used for canny edge
 %         detector. 
@@ -19,41 +20,42 @@ function [edge_vol ] = extract_edge_volume( in_vol, Method, Threshold)
 %
 
     % Check if the threshold is specified or not 
-    if nargin <= 2
-        Threshold = 0 ;
-    elseif nargin == 1 
-        if exits ('in_vol')
-            Method = 'canny' ; 
-        else
-            error ('not enough input'); 
-        end 
+    if nargin < 2
+      error('extract_edge_volume:NArgInIncorrect', ['The number ' ...
+                                'of arguments is incorrect']); 
     end 
     
     % Pre-allocate feature_mat_vol
     edge_vol = zeros( size(in_vol));
-    if strcmpi(Method, 'canny')
+    if strcmpi(method, 'canny')
+        if nargin ~= 3
+            threshold = 0; 
+        else 
+            threshold = varargin{1}; 
+        end
         parfor sl = 1 : size(in_vol, 3)
-            if ( sl <= size(in_vol, 3) )
+            if (sl <= size(in_vol, 3))
                 edge_vol(sl, :) = extract_canny_image( in_vol(:, :, sl), ...
-                                                            Threshold) ; 
+                                                            threshold) ; 
             end
         end
-    elseif strcmpi(Method, 'others')
-        disp('under construction'); 
+    else
+        error('extract_edge_volume:NotImplemented', ['The method required ' ...
+                            'is not implemented']);
     end 
 
 end
 
-function [edge_img ] = extract_canny_image( in_img,Threshold)
+function [edge_img ] = extract_canny_image( in_img,threshold)
 
 
     % Make the allocation
     edge_img = zeros(size(in_img));  
     
-    if Threshold ==0 
+    if threshold == 0 
         edge_img = edge(in_img, 'canny'); 
     else
-        edge_img = edge(in_img, 'canny', Threshold) ; 
+        edge_img = edge(in_img, 'canny', threshold) ; 
     end 
 
 end
