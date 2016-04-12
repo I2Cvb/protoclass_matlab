@@ -1,4 +1,4 @@
-function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargin )
+function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, varargin )
 % FLATTENING_VOLUME Function to flatten a 3D volume.
 %     out_vol = flattening_volume( in_vol, method ) flattens the
 %     volume using the method given.
@@ -8,7 +8,8 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
 %         Entire volume.
 %
 %     method: string
-%         Method used to flatten. Can be any of: 'srinivasan-2014'
+%         Method used to flatten. Can be any of: 'srinivasan-2014',
+%         'liu-2011'.
 %
 % 'srinivasan-2014' method:
 %     No arguments to be specified.
@@ -22,9 +23,9 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
 %     gpu_enable: boolean, optional (default=false)
 %         Either to run some processing using the GPU.
 %
-%     thres_val: float, optional (default=50)
+%     thres_val: float, optional (default=.2)
 %         Value used to threshold each image. Can be overwritten if
-%         ostu is used. The value should be between 0 and 255.
+%         ostu is used. The value should be between 0 and 1.
 %
 %     median_sz: vector of 2 int, optional (default=[5 5])
 %         The kernel size used for median filtering.
@@ -39,7 +40,6 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
 %     out_vol: 3D array
 %         Flattened volume.
 %
-
    % Check that the input is a volume
     if size(size(in_vol)) ~= 3
         error('flattening_volume:InputMustBe3D', ['The input matrix should be a volume.']);
@@ -55,59 +55,87 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
         [ baseline_vol, warped_vol ] = flattening_volume_srinivasan_2014( ...
             in_vol );
     elseif strcmp(method, 'liu-2011')
-        % Check that at least 4 arguments are given and less than 8
+        % Check that at least 2 arguments are given and less than 8
         if nargin < 2 || nargin > 8
             error('flattening_volume:NArgInIncorrect', ['The number ' ...
                                 'of arguments is incorrect']);
         elseif nargin == 2
             thres_method = 'static';
             gpu_enable = false;
-            thres_val = 50;
+            thres_val = .2;
             median_sz = [5 5];
             se_op = strel('disk', 5);
             se_cl = strel('disk', 35);
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         elseif nargin == 3
-            thres_method = varargin{3};
+            thres_method = varargin{1};
             gpu_enable = false;
-            thres_val = 50;
+            thres_val = .2;
             median_sz = [5 5];
             se_op = strel('disk', 5);
             se_cl = strel('disk', 35);
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         elseif nargin == 4
-            thres_method = varargin{3};
-            gpu_enable = varargin{4};
-            thres_val = 50;
+            thres_method = varargin{1};
+            gpu_enable = varargin{2};
+            thres_val = .2;
             median_sz = [5 5];
             se_op = strel('disk', 5);
             se_cl = strel('disk', 35);
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         elseif nargin == 5
-            thres_method = varargin{3};
-            gpu_enable = varargin{4};
-            thres_val = varargin{5};
+            thres_method = varargin{1};
+            gpu_enable = varargin{2};
+            thres_val = varargin{3};
             median_sz = [5 5];
             se_op = strel('disk', 5);
             se_cl = strel('disk', 35);
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         elseif nargin == 6
-            thres_method = varargin{3};
-            gpu_enable = varargin{4};
-            thres_val = varargin{5};
-            median_sz = varargin{6};
+            thres_method = varargin{1};
+            gpu_enable = varargin{2};
+            thres_val = varargin{3};
+            median_sz = varargin{4};
             se_op = strel('disk', 5);
             se_cl = strel('disk', 35);
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         elseif nargin == 7
-            thres_method = varargin{3};
-            gpu_enable = varargin{4};
-            thres_val = varargin{5};
-            median_sz = varargin{6};
-            se_op = varargin{7};
+            thres_method = varargin{1};
+            gpu_enable = varargin{2};
+            thres_val = varargin{3};
+            median_sz = varargin{4};
+            se_op = varargin{5};
             se_cl = strel('disk', 35);
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         elseif nargin == 8
-            thres_method = varargin{3};
-            gpu_enable = varargin{4};
-            thres_val = varargin{5};
-            median_sz = varargin{6};
-            se_op = varargin{7};
-            se_cl = varargin{8};
+            thres_method = varargin{1};
+            gpu_enable = varargin{2};
+            thres_val = varargin{3};
+            median_sz = varargin{4};
+            se_op = varargin{5};
+            se_cl = varargin{6};
+            % Call the appropriate function
+            [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( ...
+                in_vol, thres_method, gpu_enable, thres_val, median_sz, ...
+                se_op, se_cl );
         end
     else
         error('flattening_volume:NotImplemented', ['The method required ' ...
@@ -122,7 +150,7 @@ function [ baseline_vol, warped_vol ] = flattening_volume_srinivasan_2014( in_vo
     % Pre-allocate the volume
     warped_vol = zeros( size(in_vol) );
     baseline_vol = zeros( size(in_vol, 3) );
-    for sl = 1 : size(in_vol, 3)
+    parfor sl = 1 : size(in_vol, 3)
         if sl <= size(in_vol, 3)
             [ baseline_vol(sl), warped_vol(:, :, sl) ] = flattening_image_srinivasan_2014( in_vol(:, :, sl) );
         end
@@ -188,7 +216,7 @@ function [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( in_vol, thre
     % Pre-allocate the volume
     warped_vol = zeros( size(in_vol) );
     baseline_vol = zeros( size(in_vol, 3) );
-    for sl = 1 : size(in_vol, 3)
+    parfor sl = 1 : size(in_vol, 3)
         if sl <= size(in_vol, 3)
             [ baseline_vol(sl), warped_vol(:, :, sl) ] = ...
                 flattening_image_liu_2011( in_vol(:, :, sl), ...
@@ -219,28 +247,20 @@ function [ baseline_y, warped_img ] = flattening_image_liu_2011( in_img, thres_m
 
     % Check if we have to transfer the data to the GPU
     if gpu_enable
-        bw_img = gpuArray(bw_array);
+        bw_img = gpuArray(bw_img);
     end
 
     % Apply the median filter to the image
     med_img = medfilt2(bw_img, median_sz);
 
     % Apply closing
-    close_img = imclose(med_img, se_cl)
+    close_img = imclose(med_img, se_cl);
     % Apply opening
-    open_img = imopen(med_img, se_op)
+    open_img = imopen(med_img, se_op);
 
     if gpu_enable
-        open_img = gather(open_img)
+        open_img = gather(open_img);
     end
-
-    % Compute the best polynom of second degree using RANSAC
-    deg_poly = 2;
-    min_num = 5;
-    iter_num = 1000;
-    dist_max = 20;
-    poly_f = ransac( 1:size(in_img,2), idx, deg_poly, min_num, iter_num, dist_max );
-    point_poly = round( polyval( poly_f, 1:size(in_img,2) ) );
 
     % Compute second degree polynomial
     [I J] = find(open_img > 0);

@@ -79,7 +79,8 @@ function test_flattening_liu_2011(testCase)
 
     % Flatten the volume on 4 first images
     [baseline_vol, warped_vol] = flattening_volume(vol(:, :, 1:4), ...
-                                                   method, 'ostu', true);
+                                                   method, ...
+                                                   'otsu', true);
 
     % % Verify that the volume is what we are expecting
     % load('./data/vol_flattening_srinivasan_2014.mat');
