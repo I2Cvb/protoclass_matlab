@@ -13,6 +13,28 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
 % 'srinivasan-2014' method:
 %     No arguments to be specified.
 %
+% 'liu-2011' method:
+%     thresh_method: string, optional (default='static')
+%         The thresholding method to apply. Can be either:
+%         - 'static': static thresholding using thres_val.
+%         - 'otsu': threh_val will be determined using otsu.
+%
+%     gpu_enable: boolean, optional (default=false)
+%         Either to run some processing using the GPU.
+%
+%     thres_val: float, optional (default=50)
+%         Value used to threshold each image. Can be overwritten if
+%         ostu is used. The value should be between 0 and 255.
+%
+%     median_sz: vector of 2 int, optional (default=[5 5])
+%         The kernel size used for median filtering.
+%
+%     se_op: strel, optional (default=(disk, 5))
+%         The kernel used in the opening operation.
+%
+%     se_cl: strel, optional (default=(disk, 35))
+%         The kernel used in the closing operation.
+%
 % Return:
 %     out_vol: 3D array
 %         Flattened volume.
@@ -23,14 +45,70 @@ function [ baseline_vol, warped_vol ] = flattening_volume( in_vol, method, vargi
         error('flattening_volume:InputMustBe3D', ['The input matrix should be a volume.']);
     end
 
-    if strcmp(method,'srinivasan-2014')
+    if strcmp(method, 'srinivasan-2014')
         % Check that the number of arguments is correct
         if nargin ~= 2
             error('flattening_volume:NArgInIncorrect', ['The number ' ...
                                 'of arguments is incorrect']);
         end
         % Call the appropriate function
-        [ baseline_vol, warped_vol ] = flattening_volume_srinivasan_2014( in_vol );
+        [ baseline_vol, warped_vol ] = flattening_volume_srinivasan_2014( ...
+            in_vol );
+    elseif strcmp(method, 'liu-2011')
+        % Check that at least 4 arguments are given and less than 8
+        if nargin < 2 || nargin > 8
+            error('flattening_volume:NArgInIncorrect', ['The number ' ...
+                                'of arguments is incorrect']);
+        elseif nargin == 2
+            thres_method = 'static';
+            gpu_enable = false;
+            thres_val = 50;
+            median_sz = [5 5];
+            se_op = strel('disk', 5);
+            se_cl = strel('disk', 35);
+        elseif nargin == 3
+            thres_method = varargin{3};
+            gpu_enable = false;
+            thres_val = 50;
+            median_sz = [5 5];
+            se_op = strel('disk', 5);
+            se_cl = strel('disk', 35);
+        elseif nargin == 4
+            thres_method = varargin{3};
+            gpu_enable = varargin{4};
+            thres_val = 50;
+            median_sz = [5 5];
+            se_op = strel('disk', 5);
+            se_cl = strel('disk', 35);
+        elseif nargin == 5
+            thres_method = varargin{3};
+            gpu_enable = varargin{4};
+            thres_val = varargin{5};
+            median_sz = [5 5];
+            se_op = strel('disk', 5);
+            se_cl = strel('disk', 35);
+        elseif nargin == 6
+            thres_method = varargin{3};
+            gpu_enable = varargin{4};
+            thres_val = varargin{5};
+            median_sz = varargin{6};
+            se_op = strel('disk', 5);
+            se_cl = strel('disk', 35);
+        elseif nargin == 7
+            thres_method = varargin{3};
+            gpu_enable = varargin{4};
+            thres_val = varargin{5};
+            median_sz = varargin{6};
+            se_op = varargin{7};
+            se_cl = strel('disk', 35);
+        elseif nargin == 8
+            thres_method = varargin{3};
+            gpu_enable = varargin{4};
+            thres_val = varargin{5};
+            median_sz = varargin{6};
+            se_op = varargin{7};
+            se_cl = varargin{8};
+        end
     else
         error('flattening_volume:NotImplemented', ['The method required ' ...
                             'is not implemented']);
@@ -73,6 +151,101 @@ function [ baseline_y, warped_img ] = flattening_image_srinivasan_2014( in_img )
     dist_max = 20;
     poly_f = ransac( 1:size(in_img,2), idx, deg_poly, min_num, iter_num, dist_max );
     point_poly = round( polyval( poly_f, 1:size(in_img,2) ) );
+
+    % Find the minum of the baselin to realign everything
+    baseline_y = max(point_poly);
+
+    warped_img = zeros(size(in_img));
+
+    for col_idx = 1:size(in_img, 2)
+        % Compute the distance to apply the rolling
+        dist_roll = round( baseline_y - point_poly(col_idx) );
+        
+        % Assign the new column to the warped image
+        warped_img(:, col_idx) = circshift( in_img(:, col_idx), ...
+                                            dist_roll );
+    end    
+
+end
+
+
+function [ baseline_vol, warped_vol ] = flattening_volume_liu_2011( in_vol, thres_method, gpu_enable, thres_val, median_sz, se_op, se_cl )
+
+    % We need to have uint8 volume for this technique
+    if ~isa(in_vol, 'uint8')
+        % Convert the data if possible
+        if min(in_vol(:)) >= 0 && max((in_vol(:) <= 1))
+            in_vol = uint8(in_vol * 256);
+        elseif min(in_vol(:)) >= 0 && max((in_vol(:) <= 255))
+            in_vol = uint8(in_vol);
+        else
+            error('flattening_volume_liu_2011:WrongDataType', ['The ' ...
+                                'type of data is unknown.']);
+        end
+    end
+
+    % We will make a parallel processing
+    % Pre-allocate the volume
+    warped_vol = zeros( size(in_vol) );
+    baseline_vol = zeros( size(in_vol, 3) );
+    for sl = 1 : size(in_vol, 3)
+        if sl <= size(in_vol, 3)
+            [ baseline_vol(sl), warped_vol(:, :, sl) ] = ...
+                flattening_image_liu_2011( in_vol(:, :, sl), , ...
+                                           thres_method, gpu_enable, ...
+                                           thres_val, median_sz, ...
+                                           se_op, se_cl );
+        end
+    end
+
+    % Convert back the data as double
+    warped_vol = double(warped_vol) / double(max(warped_vol(:)));
+
+end
+
+
+function [ baseline_y, warped_img ] = flattening_image_liu_2011( in_img, thres_method, gpu_enable, thres_val, median_sz, se_op, se_cl )
+
+    % Check which technique to apply for thresholding
+    if strcmp(thres_method, 'otsu')
+        thres_val = graythresh(in_img);
+        bw_img = im2bw(in_img, thres_val);
+    elseif strcmp(thres_method, 'static')
+        bw_img = im2bw(in_img, thres_val);
+    else
+        error('flattening_image_liu_2011:UnknownMethod', ['The ' ...
+                            'thresholding method is unknwon.']);
+    end
+
+    % Check if we have to transfer the data to the GPU
+    if gpu_enable
+        bw_img = gpuArray(bw_array);
+    end
+
+    % Apply the median filter to the image
+    med_img = medfilt2(bw_img, median_sz);
+
+    % Apply closing
+    close_img = imclose(med_img, se_cl)
+    % Apply opening
+    open_img = imopen(med_img, se_op)
+
+    if gpu_enable
+        open_img = gather(open_img)
+    end
+
+    % Compute the best polynom of second degree using RANSAC
+    deg_poly = 2;
+    min_num = 5;
+    iter_num = 1000;
+    dist_max = 20;
+    poly_f = ransac( 1:size(in_img,2), idx, deg_poly, min_num, iter_num, dist_max );
+    point_poly = round( polyval( poly_f, 1:size(in_img,2) ) );
+
+    % Compute second degree polynomial
+    [I J] = find(open_img > 0);
+    p = polyfit(J, I, 2);
+    point_poly = round( polyval(p, 1:size(open_img, 2)) );
 
     % Find the minum of the baselin to realign everything
     baseline_y = max(point_poly);

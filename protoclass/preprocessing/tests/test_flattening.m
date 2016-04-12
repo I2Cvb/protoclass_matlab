@@ -67,3 +67,22 @@ function test_flattening_srinivisan_2014(testCase)
     verifyEqual(testCase, warped_vol, vol_gt, 'AbsTol', 1e-10);
     verifyEqual(testCase, baseline_vol, baseline_gt, 'AbsTol', 1e-10);
 end
+
+function test_flattening_liu_2011(testCase)
+% TEST_FLATTENING_LIU_2011 Test the flattening of Liu 2011
+
+    % Read the volume
+    vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
+
+    % Flatten the volume using BM3D
+    method = 'liu-2011';
+
+    % Flatten the volume on 4 first images
+    [baseline_vol, warped_vol] = flattening_volume(vol(:, :, 1:4), ...
+                                                   method, 'ostu', true);
+
+    % % Verify that the volume is what we are expecting
+    % load('./data/vol_flattening_srinivasan_2014.mat');
+    % verifyEqual(testCase, warped_vol, vol_gt, 'AbsTol', 1e-10);
+    % verifyEqual(testCase, baseline_vol, baseline_gt, 'AbsTol', 1e-10);
+end
