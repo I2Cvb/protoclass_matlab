@@ -1,4 +1,4 @@
-function [ feature_mat_vol, Pyr_indexes, feat_desc_dim ] = extract_lbp_volume_mssp( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, mapping )
+function [ feature_mat_vol, pyr_info, feat_desc_dim ] = extract_lbp_volume_mssp( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, mapping )
 % EXTRACT_LBP_VOLUME_MSSP Function to extract LBP descriptor from a
 % volume using a pyramidal and spatial blocks within a pyramids (SP) approach
 % MSSP method in comparison to SP method extract spatial blocks from the
@@ -31,10 +31,12 @@ function [ feature_mat_vol, Pyr_indexes, feat_desc_dim ] = extract_lbp_volume_ms
 % Return:
 %     feature_mat_vol : 2D array 
 %         Feature matrix
-%     Pyr_indexes : 2D array, [nx3] 
+% 
+%     pyr_info : 2D array, [nx3] 
 %         n the number of pyramids , [startingIdx, endingIdx, Pyramidlevel]
 %         First and last index in the feature_mat_vol(sl,:) that correspond
 %         to the cells extracted from each level of pyramid
+% 
 %     feat_desc_dim : 1D 
 %         Dimension of the lbp feature descriptor (ex. 59 for rotation invariant and uniform lbp)
 %
@@ -60,7 +62,7 @@ function [ feature_mat_vol, Pyr_indexes, feat_desc_dim ] = extract_lbp_volume_ms
 
         strIdx = endIdx +1 ; 
         endIdx = endIdx + numCells; 
-        Pyr_indexes = [strIdx, endIdx, lev]; 
+        pyr_info = [strIdx, endIdx, lev, numCells]; 
         
         % Using uniform mapping 
         if strcmpi(mapping , 'u2') 
