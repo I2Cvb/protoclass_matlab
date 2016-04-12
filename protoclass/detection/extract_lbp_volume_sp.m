@@ -1,8 +1,8 @@
-function [ feature_mat_vol ] = extract_lbp_volume_sp( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, Mapping )
+function [ feature_mat_vol, Pyr_indexes, feat_desc_dim ] = extract_lbp_volume_sp( in_vol, pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, mapping )
 % EXTRACT_LBP_VOLUME_SP Function to extract LBP descriptor from a
 % volume using a pyramidal and spatial blocks within a pyramids (SP) approach
 %     [ feature_mat_vol ] = extract_lbp_volume_sp( in_vol,
-%     pyr_num_lev, NumNeighbors, Radius, CellSize, Mapping, MODE ) 
+%     pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, mapping ) 
 %
 % Required arguments:
 %     in_vol : 3D array
@@ -23,22 +23,29 @@ function [ feature_mat_vol ] = extract_lbp_volume_sp( in_vol, pyr_num_lev, NumNe
 %     MODE: string 
 %          histogram ('h') , normalized histogram ('nh') 
 %
-%     Mapping: string
+%     mapping: string
 %          Basic LBP : 'none', uniform: 'u2', rotation-invariant = 'ri',
 %          uniform-rotation-invariant = 'riu2'
 % Return:
 %     feature_mat_vol : 2D array 
 %         Feature matrix
-%
+%     feat_desc_dim : int 
+%         Dimension of the lbp feature descriptor (ex. 59 for riu2)
+%     Pyr_indexes : 2D array , [nx3]
+%         n the number of pyramids , [startingIdx, endingIdx, Pyramidlevel]
+%         First and last index in the feature_mat_vol(sl,:) that correspond
+%         to the cells extracted from each level of pyramid
 
 
     % Check the number of level in the pyramid is meaningful
     if pyr_num_lev < 0
-        error('extract_lbp_volume:IncorrectNumPyr', ['The level in ' ...
+        error('extract_lbp_volume_sp:IncorrectNumPyr', ['The level in ' ...
                             'the pyramid cannot be 0 or less.']);
     end 
     % Compute the size of the descriptor
     feat_dim = 0;
+    strIdx = 0 ; 
+    endIdx = 0 ; 
     for lev = 0:pyr_num_lev - 1
         % Compute the factor of reduction to apply on the size of
         % the image
@@ -48,29 +55,42 @@ function [ feature_mat_vol ] = extract_lbp_volume_sp( in_vol, pyr_num_lev, NumNe
         % Compute the number of cell
         numCells = prod(floor(im_sz ./ CellSize));
         
-        % Using uniform mapping 
-        if strcmpi(Mapping , 'u2') 
-            feat_dim = feat_dim + numCells * ((NumNeighbors * (NumNeighbors ...
-                                                              - 1)) + 3);
-        % Using uniform and rotation-invariant mapping 
-        elseif strcmpi(Mapping , 'riu2') 
-            feat_dim = feat_dim + numCells * (NumNeighbors + 2);
+        strIdx = endIdx +1 ; 
+        endIdx = endIdx + numCells; 
+        Pyr_indexes = [strIdx, endIdx, lev]; 
         
+        
+        % Using uniform mapping 
+        if strcmpi(mapping , 'u2') 
+            feat_desc_dim = ((NumNeighbors * (NumNeighbors - 1)) + 3); 
+            feat_dim = feat_dim + numCells * feat_desc_dim;
+            
+        % Using uniform and rotation-invariant mapping 
+        elseif strcmpi(mapping , 'riu2') 
+            feat_desc_dim = NumNeighbors + 2; 
+            feat_dim = feat_dim + numCells * feat_desc_dim;
+            
         % Using rotation-invariant mapping 
-        elseif strcmpi(Mapping , 'ri')
+        elseif strcmpi(mapping , 'ri')
             % The number of features for rotation invariant only are not defined mathematically. 
             if NumNeighbors == 8 
-                feat_dim = feat_dim + numCells * 36 ; 
+                feat_desc_dim = 36; 
+                feat_dim = feat_dim + numCells * feat_desc_dim ; 
             elseif NumNeighbors == 16
-                feat_dim = feat_dim + numCells * 4116; 
+                feat_desc_dim = 4116 ; 
+                feat_dim = feat_dim + numCells * feat_desc_dim; 
             elseif NumNeighbors == 24 
-                feat_dim = feat_dim + numCells * 699252; 
+                feat_desc_dim = 699252; 
+                feat_dim = feat_dim + numCells * feat_desc_dim ; 
             end 
         
         % No mapping is used 
-        elseif strcmpi(Mapping , 'none') == 1 
-            feat_dim = feat_dim + numCells*(2^NumNeighbors); 
+        elseif strcmpi(mapping , 'none') == 1 
+            feat_desc_dim = 2^NumNeighbors; 
+            feat_dim = feat_dim + numCells * feat_desc_dim; 
         end
+        
+        
     end
 
     % Pre-allocate feature_mat_vol
@@ -83,13 +103,13 @@ function [ feature_mat_vol ] = extract_lbp_volume_sp( in_vol, pyr_num_lev, NumNe
                                                         NumNeighbors, ...
                                                         Radius, ...
                                                         CellSize, ...
-                                                        MODE, Mapping);
+                                                        MODE, mapping);
         end
     end    
 
 end
 
-function [ feature_vec_img ] = extract_lbp_image_sp( in_img, pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, Mapping )
+function [ feature_vec_img ] = extract_lbp_image_sp( in_img, pyr_num_lev, NumNeighbors, Radius, CellSize, MODE, mapping )
 
     % Compute the size of the descriptor to make pre-allocation to
     % speed-up
@@ -104,37 +124,37 @@ function [ feature_vec_img ] = extract_lbp_image_sp( in_img, pyr_num_lev, NumNei
         numCells = prod(floor(im_sz ./ CellSize));
 
         % Using uniform mapping 
-        if strcmpi(Mapping , 'u2') 
+        if strcmpi(mapping , 'u2') 
             feat_desc_dim = ((NumNeighbors * (NumNeighbors - 1)) + 3); 
             feat_dim = feat_dim + numCells * feat_desc_dim;
             % Loading the appropriate map
-            load(['Map_'  num2str(NumNeighbors) '_' Mapping '.mat']); 
+            load(['Map_'  num2str(NumNeighbors) '_' mapping '.mat']); 
             
         % Using uniform and rotation-invariant mapping 
-        elseif strcmpi(Mapping , 'riu2') 
+        elseif strcmpi(mapping , 'riu2') 
             feat_desc_dim = NumNeighbors + 2; 
             feat_dim = feat_dim + numCells * feat_desc_dim;
             % Loading the appropriate map
-            load(['Map_' num2str(NumNeighbors) '_' Mapping '.mat'])
+            load(['Map_' num2str(NumNeighbors) '_' mapping '.mat'])
         
         % Using rotation-invariant mapping 
-        elseif strcmpi(Mapping , 'ri') 
+        elseif strcmpi(mapping , 'ri') 
             % The number of features for rotation invariant only are not defined mathematically. 
             if NumNeighbors == 8 
                 feat_desc_dim = 36; 
                 feat_dim = feat_dim + numCells * feat_desc_dim ; 
             elseif NumNeighbors == 16
                 feat_desc_dim = 4116 ; 
-                feat_dim = feat_dim + numCells * feat_desc_dim; 
+                feat_dim = feat_dim + numCells * feat_desc_dim ; 
             elseif NumNeighbors == 24 
                 feat_desc_dim = 699252; 
                 feat_dim = feat_dim + numCells * feat_desc_dim ; 
             end 
             % Loading the appropriate mapping
-            load(['Map_' num2str(NumNeighbors) '_' Mapping '.mat']); 
+            load(['Map_' num2str(NumNeighbors) '_' mapping '.mat']); 
         
         % No mapping is used 
-        elseif strcmpi(Mapping , 'none') 
+        elseif strcmpi(mapping , 'none') 
             feat_desc_dim = 2^NumNeighbors; 
             feat_dim = feat_dim + numCells * feat_desc_dim; 
         end
@@ -185,7 +205,7 @@ function [ feature_vec_img ] = extract_lbp_image_sp( in_img, pyr_num_lev, NumNei
             im_rsz_sb = im_rsz(xstrIdx(X(sbId)): xendIdx(X(sbId)), ystrIdx(X(sbId)): yendIdx(X(sbId))); 
             
             % Compute the LBP feature
-            feature_vec_img_lev(((sbId-1)*feat_desc_dim)+1 : sbId * feat_desc_dim )  = lbp(im_rsz_sb,  Radius,  NumNeighbors, Map,MODE );
+            feature_vec_img_lev(((sbId-1)*feat_desc_dim)+1 : sbId * feat_desc_dim)  = lbp(im_rsz_sb, Radius, NumNeighbors, Map, MODE );
         end  
         feature_vec_img( cum_feat_dim(lev) + 1 : cum_feat_dim(lev + 1) )  = feature_vec_img_lev; 
         
