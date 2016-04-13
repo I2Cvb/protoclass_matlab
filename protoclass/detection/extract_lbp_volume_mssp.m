@@ -51,6 +51,7 @@ function [ feature_mat_vol, pyr_info, feat_desc_dim ] = extract_lbp_volume_mssp(
     feat_dim = 0;
     strIdx = 0 ; 
     endIdx = 0 ; 
+    pyr_info = []; 
     for lev = 0:pyr_num_lev - 1
         % Compute the factor of reduction to apply on the size of
         % the image
@@ -60,9 +61,6 @@ function [ feature_mat_vol, pyr_info, feat_desc_dim ] = extract_lbp_volume_mssp(
         % Compute the number of cell
         numCells = prod(floor(im_sz ./ CellSize)) + prod((floor(im_sz./CellSize) -1));
 
-        strIdx = endIdx +1 ; 
-        endIdx = endIdx + numCells; 
-        pyr_info = [strIdx, endIdx, lev, numCells]; 
         
         % Using uniform mapping 
         if strcmpi(mapping , 'u2') 
@@ -93,14 +91,17 @@ function [ feature_mat_vol, pyr_info, feat_desc_dim ] = extract_lbp_volume_mssp(
             feat_desc_dim = 2^NumNeighbors; 
             feat_dim = feat_dim + numCells * feat_desc_dim; 
         end
-        %disp(feat_dim);
+
+        strIdx = endIdx +1 ;
+        endIdx = endIdx + numCells*feat_desc_dim;
+        pyr_info = [pyr_info ; [strIdx, endIdx, lev+1, numCells]];
+
 
     end
-    disp(feat_dim); 
     % Pre-allocate feature_mat_vol
     feature_mat_vol = zeros( size(in_vol, 3), feat_dim );
 
-    for sl = 1 : size(in_vol, 3)
+    parfor sl = 1 : size(in_vol, 3)
         if ( sl <= size(in_vol, 3) )
             feature_mat_vol(sl, :) = extract_lbp_image_mssp( in_vol(:, :, sl), ...
                                                         pyr_num_lev, ...
