@@ -98,7 +98,7 @@ function [ feature_mat_vol, pyr_info, feat_desc_dim ] = extract_lbp_volume_mssp(
     % Pre-allocate feature_mat_vol
     feature_mat_vol = zeros( size(in_vol, 3), feat_dim );
 
-    parfor sl = 1 : size(in_vol, 3)
+    for sl = 1 : size(in_vol, 3)
         if ( sl <= size(in_vol, 3) )
             feature_mat_vol(sl, :) = extract_lbp_image_mssp( in_vol(:, :, sl), ...
                                                         pyr_num_lev, ...
@@ -158,7 +158,8 @@ function [ feature_vec_img ] = extract_lbp_image_mssp( in_img, pyr_num_lev, NumN
         % No mapping is used 
         elseif strcmpi(mapping , 'none') 
             feat_desc_dim = 2^NumNeighbors; 
-            feat_dim = feat_dim + numCells * feat_desc_dim; 
+            feat_dim = feat_dim + numCells * feat_desc_dim;
+            Map = 0;
         end
     end
 
@@ -238,9 +239,15 @@ function [ feature_vec_img ] = extract_lbp_image_mssp( in_img, pyr_num_lev, NumN
             im_rsz_sb = im_rsz(xstrIdx(X(sbId)): xendIdx(X(sbId)), ystrIdx(Y(sbId)): yendIdx(Y(sbId))); 
             
             % Compute the LBP feature
-            feature_vec_img_lev(((sbId-1)*feat_desc_dim)+1 : sbId * feat_desc_dim ) = lbp(im_rsz_sb, Radius, NumNeighbors, Map, MODE );
+            feature_vec_img_lev(((sbId-1)*feat_desc_dim)+1 : sbId * ...
+                                feat_desc_dim ) = lbp(im_rsz_sb, ...
+                                                      Radius, ...
+                                                      NumNeighbors, ...
+                                                      Map, MODE );
+            disp(size(feature_vec_img_lev))
         end  
         
+        disp(size(feature_vec_img( cum_feat_dim(lev) + 1 : cum_feat_dim(lev + 1) )))
         feature_vec_img( cum_feat_dim(lev) + 1 : cum_feat_dim(lev + 1) ) = feature_vec_img_lev; 
         
     end

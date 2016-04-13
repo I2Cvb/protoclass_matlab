@@ -1,4 +1,4 @@
-function [edge_vol ] = extract_edge_volume( in_vol, method, varargin)
+function [ edge_vol ] = extract_edge_volume( in_vol, method, varargin)
 % EXTRACT_EDGE_VOLUME Function to extract edges from spatial blocks within the images of the
 % volume considering different levels of pyramid
 %     [ feature_mat_vol ] = extract_edge( in_vol,
@@ -33,12 +33,8 @@ function [edge_vol ] = extract_edge_volume( in_vol, method, varargin)
         else 
             threshold = varargin{1}; 
         end
-        parfor sl = 1 : size(in_vol, 3)
-            if (sl <= size(in_vol, 3))
-                edge_vol(sl, :) = extract_canny_image( in_vol(:, :, sl), ...
-                                                            threshold) ; 
-            end
-        end
+        % Call the appropriate function
+        edge_vol = extract_canny_volume(in_vol, threshold);
     else
         error('extract_edge_volume:NotImplemented', ['The method required ' ...
                             'is not implemented']);
@@ -46,12 +42,22 @@ function [edge_vol ] = extract_edge_volume( in_vol, method, varargin)
 
 end
 
-function [edge_img ] = extract_canny_image( in_img,threshold)
+function [ edge_vol ] = extract_canny_volume( in_vol, threshold )
 
+    % Pre-allocate the volume for parallel processing
+    edge_vol = zeros(size(in_vol));
 
-    % Make the allocation
-    edge_img = zeros(size(in_img));  
-    
+    parfor sl = 1 : size(in_vol, 3)
+        if (sl <= size(in_vol, 3))
+            edge_vol(:, :, sl) = extract_canny_image( in_vol(:, :, sl), ...
+                                                   threshold); 
+        end
+    end
+
+end
+
+function [ edge_img ] = extract_canny_image( in_img, threshold )
+
     if threshold == 0 
         edge_img = edge(in_img, 'canny'); 
     else
