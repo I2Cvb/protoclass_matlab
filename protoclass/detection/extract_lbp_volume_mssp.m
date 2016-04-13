@@ -93,8 +93,10 @@ function [ feature_mat_vol, pyr_info, feat_desc_dim ] = extract_lbp_volume_mssp(
             feat_desc_dim = 2^NumNeighbors; 
             feat_dim = feat_dim + numCells * feat_desc_dim; 
         end
-    end
+        %disp(feat_dim);
 
+    end
+    disp(feat_dim); 
     % Pre-allocate feature_mat_vol
     feature_mat_vol = zeros( size(in_vol, 3), feat_dim );
 
@@ -115,7 +117,7 @@ function [ feature_vec_img ] = extract_lbp_image_mssp( in_img, pyr_num_lev, NumN
 
     % Compute the size of the descriptor to make pre-allocation to
     % speed-up
-    feat_dim = [];
+    feat_dim = 0;
     for lev = 0:pyr_num_lev - 1
         % Compute the factor of reduction to apply on the size of
         % the image
@@ -123,8 +125,8 @@ function [ feature_vec_img ] = extract_lbp_image_mssp( in_img, pyr_num_lev, NumN
         im_sz = ceil( size(in_img) / factor );
        
         % Compute the number of cell
-        numCells = prod(floor(im_sz ./ CellSize)) + prod((floor(im_sz./CellSize) - 1));
-
+        numCells = prod(floor(im_sz ./ CellSize)) + prod(floor(im_sz./CellSize) - 1);
+        
         % Using uniform mapping 
         if strcmpi(mapping , 'u2') 
             feat_desc_dim = ((NumNeighbors * (NumNeighbors - 1)) + 3); 
@@ -162,11 +164,10 @@ function [ feature_vec_img ] = extract_lbp_image_mssp( in_img, pyr_num_lev, NumN
             Map = 0;
         end
     end
-
+    
     % Make the allocation
-    feature_vec_img = zeros( 1, sum(feat_dim) );  
-    cum_feat_dim = [ 0 cumsum( feat_dim ) ];
-
+    feature_vec_img = [];
+     
     for lev = 1:pyr_num_lev
         % Downsize if necessary
         im_rsz = in_img;
@@ -177,79 +178,78 @@ function [ feature_vec_img ] = extract_lbp_image_mssp( in_img, pyr_num_lev, NumN
         end
         % Total number of cells in the image 
         numCells = prod(floor(size(im_rsz) ./ CellSize)) + prod((floor(size(im_rsz) ./ CellSize))-1);
-        
-        % Make the allocation 
-        feature_vec_img_lev = zeros(1, numCells * feat_desc_dim); 
        
+        % Make the allocation 
+        %feature_vec_lev = zeros(1, numCells * feat_desc_dim); 
+        feature_vec_lev = [] ; 
+        
         % Extracting the spatial blockes based on cellsize  
         % bloclproc is not used because it returns all the blocks even the
-        % partial blocks smaller than the specified size on the border 
-        
+        % partial blocks smaller than the specified size on the border         
+
         %%% ---- Indexes for spatial non-overlapping blocks  
         % Starting indexes of cells in y
-        ystrIdx = []; 
-        yendIdx = []; 
+   
         ystrIdx_nol_sb = 1: CellSize(1,2) : size(im_rsz,2); 
         if rem(size(im_rsz, 2), CellSize(1,2)) ~= 0 
             ystrIdx_nol_sb(end) = []; 
         end
-        ystrIdx = [ystrIdx , ystrIdx_nol_sb];
         
         % Ending indexes for cells in y
         yendIdx_nol_sb = CellSize(1,2): CellSize(1,2): size(im_rsz, 2); 
-        yendIdx= [yendIdx, yendIdx_nol_sb]; 
         
         % Starting indexes for cells in x
-        xstrIdx = []; 
-        xendIdx = []; 
         xstrIdx_nol_sb = 1: CellSize(1,1): size(im_rsz, 1); 
         if rem(size(im_rsz, 1), CellSize(1,1)) ~= 0 
             xstrIdx_nol_sb(end) = []; 
         end 
-        xstrIdx = [xstrIdx, xstrIdx_nol_sb]; 
         % Ending indexes for cells in x 
         xendIdx_nol_sb = CellSize(1,1): CellSize(1,1) : size(im_rsz, 1); 
-        xendIdx = [xendIdx, xendIdx_nol_sb]; 
+  
+        % non-overlapping
+        [X_nol, Y_nol] = meshgrid(1: length(xendIdx_nol_sb), 1: length(yendIdx_nol_sb)); 
+        X_nol = X_nol(:); Y_nol = Y_nol(:); 
+    
+        for sbId = 1 : length(X_nol)
+            im_rsz_sb = im_rsz(xstrIdx_nol_sb(X_nol(sbId)): xendIdx_nol_sb(X_nol(sbId)), ystrIdx_nol_sb(Y_nol(sbId)): yendIdx_nol_sb(Y_nol(sbId))); 
+            
+            % Compute the LBP feature
+            tem = lbp(im_rsz_sb, Radius, NumNeighbors, Map, MODE);
+            feature_vec_lev = [feature_vec_lev, tem]; 
+        end  
 
+       
         % In case of a large CellSize there wont be intersections and
         % therefore no overlapping window
         if prod((floor(size(im_rsz) ./ CellSize))-1) ~= 0 
         
-        %%% ---- Indexes for over-lapping blocks
-        % StartingIdx y 
-        ystrIdx_ol_sb = ystrIdx_nol_sb(1:end-1) + floor(CellSize(1,2)/2); 
-        ystrIdx = [ystrIdx, ystrIdx_ol_sb]; 
-        % EndingIdx y 
-        yendIdx_ol_sb = yendIdx_nol_sb(1:end-1) + floor(CellSize(1,2)/2); 
-        yendIdx = [yendIdx, yendIdx_ol_sb]; 
+            %%% ---- Indexes for over-lapping blocks
+            % StartingIdx y 
+            ystrIdx_ol_sb = ystrIdx_nol_sb(1:end-1) + floor(CellSize(1,2)/2); 
+            % EndingIdx y 
+            yendIdx_ol_sb = yendIdx_nol_sb(1:end-1) + floor(CellSize(1,2)/2); 
         
-        % StartingIdx x
-        xstrIdx_ol_sb = xstrIdx_nol_sb(1:end-1) + floor(CellSize(1,1)/2); 
-        xstrIdx = [xstrIdx, xstrIdx_ol_sb]; 
-        % EndingIdx x 
-        xendIdx_ol_sb = xendIdx_nol_sb(1:end-1) + floor(CellSize(1,1))/2; 
-        xendIdx = [xendIdx, xendIdx_ol_sb]; 
-        end 
-        
-        % Creating a meshgird 
-        [X, Y] = meshgrid(1: length(xendIdx), 1: length(yendIdx)); 
-        X = X(:); Y = Y(:); 
-        
-        for sbId = 1 : length(X)
-            im_rsz_sb = im_rsz(xstrIdx(X(sbId)): xendIdx(X(sbId)), ystrIdx(Y(sbId)): yendIdx(Y(sbId))); 
+            % StartingIdx x
+            xstrIdx_ol_sb = xstrIdx_nol_sb(1:end-1) + floor(CellSize(1,1)/2); 
+            % EndingIdx x 
+            xendIdx_ol_sb = xendIdx_nol_sb(1:end-1) + floor(CellSize(1,1))/2; 
+  
+            % overlapping 
+            [X_ol, Y_ol] = meshgrid(1: length(xendIdx_ol_sb), 1: length(yendIdx_ol_sb)); 
+            X_ol = X_ol(:); Y_ol = Y_ol(:); 
+       
+            for sbId = 1 : length(X_ol)
+                im_rsz_sb = im_rsz(xstrIdx_ol_sb(X_ol(sbId)): xendIdx_ol_sb(X_ol(sbId)), ystrIdx_ol_sb(Y_ol(sbId)): yendIdx_ol_sb(Y_ol(sbId))); 
             
-            % Compute the LBP feature
-            feature_vec_img_lev(((sbId-1)*feat_desc_dim)+1 : sbId * ...
-                                feat_desc_dim ) = lbp(im_rsz_sb, ...
-                                                      Radius, ...
-                                                      NumNeighbors, ...
-                                                      Map, MODE );
-            disp(size(feature_vec_img_lev))
-        end  
+                % Compute the LBP feature
+                tem = lbp(im_rsz_sb,  Radius, NumNeighbors, Map, MODE);
+                feature_vec_lev = [feature_vec_lev, tem]; 
+            end          
         
-        disp(size(feature_vec_img( cum_feat_dim(lev) + 1 : cum_feat_dim(lev + 1) )))
-        feature_vec_img( cum_feat_dim(lev) + 1 : cum_feat_dim(lev + 1) ) = feature_vec_img_lev; 
-        
+        end 
+         
+        feature_vec_img = [feature_vec_img, feature_vec_lev];        
+         
     end
 
 end
