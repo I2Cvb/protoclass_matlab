@@ -119,3 +119,23 @@ function test_denoising_bm3d_with_int(testCase)
     load('./data/vol_out_bm3d_int.mat');
     verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10);
 end
+
+function test_denoising_nlm_with_float(testCase)
+% TEST_DENOISING_nlmB Function to test the BM3D normal usage with
+% float data
+
+    % Read the volume
+    vol = read_oct_volume('./data/PCS57635OS.img', 512, 128, 1024);
+    vol = vol / max(vol(:));
+
+    % Denoise the volume using BM3D
+    method = 'nlm';
+    % Give only the first 4 slides
+    vol_out = denoising_volume(vol(:, :, 1:4), method, 7, 11, .08);
+    
+    % Verify that the volume is what we are expecting
+    vol_gt = vol_out;
+    save('./data/vol_out_nlm_float.mat', 'vol_gt');
+    load('./data/vol_out_nlm_float.mat');
+    verifyEqual(testCase, vol_out, vol_gt, 'AbsTol', 1e-10);
+end
