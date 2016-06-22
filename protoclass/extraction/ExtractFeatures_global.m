@@ -17,6 +17,7 @@
 %%% GLCMaD     | theta (default = 45) options:[0 45 90 135], num_levels (default = 16) options:[8,16,32]
 %%% HoG        | cellSize (default = 9)
 %%% Sift       | vl_sift parameters 
+%%% DSift      | vl_dsift parameters 
 %%% Wavelet    | wname (default = 'db9'), option2 (default = 'WP'), nlevel(default = 4), RI (default = 0), coloroption (default = 'g')
 %%% Color1     | nbins (default = 42)
 %%% Color2     | nbins (default = 42) , PSize = size of patches for
@@ -168,13 +169,23 @@
         feature_vector = counts'; 
 
 
-    elseif (strncmpi('Sift', FeatureId, 3) == 1)
+    elseif (strncmpi('Sift', FeatureId, 4) == 1)
         disp('Sift features are extracted')
         addpath ../../third_party/vlfeat-0.9.16/toolbox/
         vl_setup
         [Centers, Descriptor] = vl_sift(single(ImgGray)); 
         feature_vector = Descriptor; 
         disp('... done.')
+
+
+    % elseif (strncmpi('DSift', FeatureId, 5) == 1)
+    %     disp('Sift features are extracted')
+    %     addpath ../../third_party/vlfeat-0.9.16/toolbox/
+    %     vl_setup
+    %     [Centers, TempDescriptor] = vl_dsift(single(ImgGray));
+    %     [counts, ~] = imhist(TempDescriptor(:)); 
+    %     feature_vector = Descriptor; 
+    %     disp('... done.')
 
     elseif (strncmpi('Color1', FeatureId, 6) == 1)
         disp(['Color statistics features are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
@@ -187,7 +198,7 @@
         feature_vector(length(temp1)+(2*input.nbins)+1:length(temp1)+(3*input.nbins)) = temp2(3,:)./sum(temp2(3,:));
 
 
-    elseif (strncmpi('Color2', FeatureId, 3) == 1)
+    elseif (strncmpi('Color2', FeatureId, 6) == 1)
         disp(['Angle and Hue histogram of opponent color space are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
         addpath tools/Color/
         [row, col, d] = size(ImgColor); 
