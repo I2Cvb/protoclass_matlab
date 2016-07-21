@@ -60,7 +60,14 @@
 
     %%%------------------------------------------------------------------------
     Img = im2double (Img); 
-    grayImg = mat2gray(rgb2gray(Img)); 
+    
+    [w, h, d] = size(Img); 
+    if d ~= 1
+        grayImg = mat2gray(rgb2gray(Img)); 
+    else
+        grayImg = mat2gray(Img); 
+    end
+
 
 
     if (isempty(input.Mask) ~= 1)
@@ -115,9 +122,9 @@
             radius = 1 ; 
         end 
         disp(['LBP features with sampling number of ' num2str(input.samples) 'and option of' input.option1 ' are being extracted'])
-        addpath tools/LBP/
+        % addpath tools/LBP/
         %%% Loading the look up map 
-        load(['tools/LBP/maps/' 'Map_' num2str(input.samples) '_' input.option1 '.mat']); 
+        load(['Map_lbp_' num2str(input.samples) '_' input.option1 '.mat']); 
         feature_vector = lbp(ImgGray,radius,input.samples,Map,'nh');
         disp('...done.')
 
@@ -131,15 +138,15 @@
             radius = 1 ; 
         end 
         disp(['CLBP features with sampling number of ' num2str(input.samples) 'and option of' input.option1 ' are being extracted ...'])
-        addpath tools/CLBP/
+        %addpath tools/CLBP/
         %%% Loading the look up map 
-        load(['tools/CLBP/maps/' 'Map_' num2str(input.samples) '_' input.option1 '.mat']); 
+        load(['Map_clbp_' num2str(input.samples) '_' input.option1 '.mat']); 
         feature_vector = clbp(ImgGray,radius,input.samples,Map,'nh');
         disp('...done.')
 
     elseif (strncmpi('GLCMaO', FeatureId, 6) == 1)
         disp(['GLCMaO features with distance of ' num2str(input.distance) 'and gray-levels of' num2str(input.num_levels) ' are being extracted'])
-        addpath tools/GLCMaO/
+        %addpath tools/GLCMaO/
         feature_vector =  Extract_features_GLCMAO(ImgGray.*255,input.distance, input.num_levels); 
         disp('... done.')
 
@@ -147,21 +154,23 @@
 
     elseif (strncmpi('GLCMaD', FeatureId, 6) == 1)
         disp(['GLCMaO features with distance of ' num2str(input.distance) 'and gray-levels of' num2str(input.num_levels) ' are being extracted'])
-        addpath tools/GLCMaD/
+        %addpath tools/GLCMaD/
         feature_vector =  Extract_features_GLCMAD(ImgGray.*255,input.theta, input.num_levels); 
         disp('... done.')
 
 
     elseif (strncmpi('Gabor', FeatureId, 5) == 1)
         disp(['Gabor filter features with ' num2str(input.scale) 'scale and ' num2str(input.orientation) ' orientations are being detected'])
-        addpath tools/GaborFilter/
+        %addpath tools/GaborFilter/
         feature_vector = gabor_feature_calculation(ImgGray,input.scale,input.orientation,size(ImgGray,1)); 
         disp('... done.')
 
 
     elseif (strncmpi('HoG', FeatureId, 3) == 1)
         disp(['HoG features using ' num2str(input.cellSize) ' as cell-size are being detected'])
-        addpath ../../third_party/vlfeat-0.9.16/toolbox/
+        addpath(genpath(fullfile(pwd, ['third_party/vlfeat-0.9.20/' ...
+                            'toolbox']))); 
+        %addpath ../../third_party/vlfeat-0.9.16/toolbox/
         vl_setup
         TempGray = vl_hog(im2single(ImgGray),input.cellSize, 'verbose');
         [counts, ~] = imhist(TempGray(:)');
@@ -171,25 +180,18 @@
 
     elseif (strncmpi('Sift', FeatureId, 4) == 1)
         disp('Sift features are extracted')
-        addpath ../../third_party/vlfeat-0.9.16/toolbox/
+        %addpath ../../third_party/vlfeat-0.9.16/toolbox/
+        addpath(genpath(fullfile(pwd, ['third_party/vlfeat-0.9.20/' ...
+                            'toolbox']))); 
         vl_setup
         [Centers, Descriptor] = vl_sift(single(ImgGray)); 
         feature_vector = Descriptor; 
         disp('... done.')
 
 
-    % elseif (strncmpi('DSift', FeatureId, 5) == 1)
-    %     disp('Sift features are extracted')
-    %     addpath ../../third_party/vlfeat-0.9.16/toolbox/
-    %     vl_setup
-    %     [Centers, TempDescriptor] = vl_dsift(single(ImgGray));
-    %     [counts, ~] = imhist(TempDescriptor(:)); 
-    %     feature_vector = Descriptor; 
-    %     disp('... done.')
-
     elseif (strncmpi('Color1', FeatureId, 6) == 1)
         disp(['Color statistics features are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
-        addpath tools/Color/ 
+        %addpath tools/Color/ 
         temp1 = clrFeatures(ImgColor, Mask); 
         feature_vector (1:length(temp1)) =  temp1'; 
         [temp2, HistCube, HistVec] = clrHistFeatures (ImgColor, Mask, input.nbins); 
@@ -200,7 +202,7 @@
 
     elseif (strncmpi('Color2', FeatureId, 6) == 1)
         disp(['Angle and Hue histogram of opponent color space are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
-        addpath tools/Color/
+        % addpath tools/Color/
         [row, col, d] = size(ImgColor); 
         minDim = min(row, col); 
         remind = rem(minDim, 20); 
@@ -210,7 +212,7 @@
 
 
     elseif (strncmpi('wavelet', FeatureId, 7) == 1)
-        addpath tools/Wavelet/
+        %addpath tools/Wavelet/
         disp(['Wavelet features are extracted with specified parameters - option: ' input.option2 ' color-option: ' input.coloroption ...
             ' levels: ' num2str(input.nlevel) ' RI: ' num2str(input.RI) ' wavelet: ' input.wname])
         feature_vector = ExtractFeatures_wavelet(ImgGray,input.wname, input.RI, input.option2, input.coloroption, input.nlevel); 

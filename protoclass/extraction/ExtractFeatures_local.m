@@ -30,7 +30,7 @@
     %%% Setting the necessary directories -------------------------------------
     %%% The function operates within the protoclass-matlab folder 
     addpath ../../third_party/Basic_function
-
+   
     %%% Parameters initialization 
     input.patchSize = 16; 
     input.Mask = [] ; 
@@ -60,7 +60,7 @@
     if d ~= 1 
         grayImg = mat2gray(rgb2gray(Img)); 
     else 
-        grayImg = Img; 
+        grayImg = mat2gray(Img); 
     end
 
     if (isempty(input.Mask) ~= 1)
@@ -160,7 +160,7 @@
         disp(['LBP features with sampling number of ' num2str(input.samples) 'and option of' input.option1 ' are being extracted'])
         %addpath tools/LBP/
         %%% Loading the look up map 
-        load(['Map_' num2str(input.samples) '_' input.option1 '.mat']); 
+        load(['Map_lbp_' num2str(input.samples) '_' input.option1 '.mat']); 
         
         for pId = 1 : length(X) %%% Main loop for extracting the patches from the image 
             clear Patch feature_patch 
@@ -215,7 +215,7 @@
         disp(['CLBP features with sampling number of ' num2str(input.samples) 'and option of' input.option1 ' are being extracted ...'])
         %addpath tools/CLBP/
         %%% Loading the look up map 
-        load(['Map_' num2str(input.samples) '_' input.option1 '.mat']); 
+        load(['Map_clbp_' num2str(input.samples) '_' input.option1 '.mat']); 
         
         for pId = 1 : length(X) %%% Main loop for extracting the patches from the image 
             clear Patch feature_patch 
@@ -260,7 +260,7 @@
 
     elseif (strncmpi('GLCMaD', FeatureId, 6) == 1)
         disp(['GLCMaO features with distance of ' num2str(input.distance) 'and gray-levels of' num2str(input.num_levels) ' are being extracted'])
-        addpath tools/GLCMaD/
+        %addpath tools/GLCMaD/
         
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -321,9 +321,7 @@
 
     elseif (strncmpi('HoG', FeatureId, 3) == 1)
         disp(['HoG features using ' num2str(input.cellSize) ' as cell-size are being detected'])
-        %addpath ../../third_party/vlfeat-0.9.16/toolbox/
-        addpath ../../third_party/vlfeat-0.9.20/toolbox/
-        
+        addpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
         vl_setup
         
         %%% Divding the image into patches 
@@ -356,8 +354,7 @@
 
     elseif (strncmpi('Sift', FeatureId, 3) == 1)
         disp('Sift features are extracted')
-        
-        %addpath ../../third_party/vlfeat-0.9.20/toolbox/
+        addpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
         vl_setup
         
         if PSize < 16                %%% indicating that the limit size of the window  
@@ -392,7 +389,6 @@
 
     elseif (strncmpi('Color1', FeatureId, 6) == 1)
         disp(['Color statistics features are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
-        %addpath tools/Color/ 
         
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -428,8 +424,7 @@
 
     elseif (strncmpi('Color2', FeatureId, 3) == 1)
         disp(['Angle and Hue histogram of opponent color space are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
-        %addpath tools/Color/
-        
+       
                 
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -461,8 +456,7 @@
 
     elseif (strncmpi('wavelet', FeatureId, 7) == 1)
         
-        %addpath tools/Wavelet/
-
+       
         disp('Attention the size of this descriptor depending on the user option might be too large !! ')
         disp(['Wavelet features are extracted with specified parameters - option: ' input.option2 ' color-option: ' input.coloroption ...
             ' levels: ' num2str(input.nlevel) ' RI: ' num2str(input.RI) ' wavelet: ' input.wname])

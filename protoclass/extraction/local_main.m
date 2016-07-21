@@ -21,15 +21,15 @@
     %%% Initialization 
     clear 
     %%%% This is specific to PH2 dataset 
-    ImgPath = '/home/mojdeh/Documents/PhD/Coding/Datasets/PH2Dataset/'; 
-    resultPath = '/home/mojdeh/Documents/PhD/Coding/Matlab_codes/Classification/M_D_B_PH2/'; 
+    ImgPath = '/home/lemaitre/Documents/PhD/Coding/Datasets/PH2Dataset/'; 
+    resultPath = '/home/lemaitre/Documents/PhD/Coding/Matlab_codes/Classification/M_D_B_PH2/'; 
     name1 = 'PH2_Dataset_images';
     name2 = '_Dermoscopic_Image'; 
     name3 = '_lesion';
     load(fullfile(ImgPath, 'PH2_DataInformation.mat')); 
 
     data = Data_Sorted; 
-    for i = 1 : length(BinaryLabels)
+    for i = 1 : 1 % length(BinaryLabels)
         currFile = Idx_label(i) ; 
 
         Img = imread(fullfile(ImgPath, name1, cell2mat(data(currFile,1)) ,[cell2mat(data(currFile,1)) name2], ...
