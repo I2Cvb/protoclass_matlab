@@ -56,7 +56,12 @@
     
     %%%------------------------------------------------------------------------
     Img = im2double (Img); 
-    grayImg = mat2gray(rgb2gray(Img)); 
+    [w, h, d] = size(Img); 
+    if d ~= 1 
+        grayImg = mat2gray(rgb2gray(Img)); 
+    else 
+        grayImg = Img; 
+    end
 
     if (isempty(input.Mask) ~= 1)
        
@@ -153,9 +158,9 @@
         
         
         disp(['LBP features with sampling number of ' num2str(input.samples) 'and option of' input.option1 ' are being extracted'])
-        addpath tools/LBP/
+        %addpath tools/LBP/
         %%% Loading the look up map 
-        load(['tools/LBP/maps/' 'Map_' num2str(input.samples) '_' input.option1 '.mat']); 
+        load(['Map_' num2str(input.samples) '_' input.option1 '.mat']); 
         
         for pId = 1 : length(X) %%% Main loop for extracting the patches from the image 
             clear Patch feature_patch 
@@ -208,9 +213,9 @@
         
         
         disp(['CLBP features with sampling number of ' num2str(input.samples) 'and option of' input.option1 ' are being extracted ...'])
-        addpath tools/CLBP/
+        %addpath tools/CLBP/
         %%% Loading the look up map 
-        load(['tools/CLBP/maps/' 'Map_' num2str(input.samples) '_' input.option1 '.mat']); 
+        load(['Map_' num2str(input.samples) '_' input.option1 '.mat']); 
         
         for pId = 1 : length(X) %%% Main loop for extracting the patches from the image 
             clear Patch feature_patch 
@@ -284,7 +289,7 @@
         
     elseif (strncmpi('Gabor', FeatureId, 5) == 1)
         disp(['Gabor filter features with ' num2str(input.scale) 'scale and ' num2str(input.orientation) ' orientations are being detected'])
-        addpath tools/GaborFilter/
+        %addpath tools/GaborFilter/
         
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -316,7 +321,9 @@
 
     elseif (strncmpi('HoG', FeatureId, 3) == 1)
         disp(['HoG features using ' num2str(input.cellSize) ' as cell-size are being detected'])
-        addpath ../../third_party/vlfeat-0.9.16/toolbox/
+        %addpath ../../third_party/vlfeat-0.9.16/toolbox/
+        addpath ../../third_party/vlfeat-0.9.20/toolbox/
+        
         vl_setup
         
         %%% Divding the image into patches 
@@ -350,7 +357,7 @@
     elseif (strncmpi('Sift', FeatureId, 3) == 1)
         disp('Sift features are extracted')
         
-        addpath ../../third_party/vlfeat-0.9.16/toolbox/
+        %addpath ../../third_party/vlfeat-0.9.20/toolbox/
         vl_setup
         
         if PSize < 16                %%% indicating that the limit size of the window  
@@ -385,7 +392,7 @@
 
     elseif (strncmpi('Color1', FeatureId, 6) == 1)
         disp(['Color statistics features are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
-        addpath tools/Color/ 
+        %addpath tools/Color/ 
         
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -421,7 +428,7 @@
 
     elseif (strncmpi('Color2', FeatureId, 3) == 1)
         disp(['Angle and Hue histogram of opponent color space are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
-        addpath tools/Color/
+        %addpath tools/Color/
         
                 
         %%% Divding the image into patches 
@@ -454,7 +461,7 @@
 
     elseif (strncmpi('wavelet', FeatureId, 7) == 1)
         
-        addpath tools/Wavelet/
+        %addpath tools/Wavelet/
 
         disp('Attention the size of this descriptor depending on the user option might be too large !! ')
         disp(['Wavelet features are extracted with specified parameters - option: ' input.option2 ' color-option: ' input.coloroption ...
