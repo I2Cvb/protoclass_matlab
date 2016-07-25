@@ -36,7 +36,7 @@
     input.Mask = [] ; 
     input.samples = 16 ; 
     input.radius = 2; 
-    input.option1 = 'riu'; 
+    input.option1 = 'riu2'; 
     input.distance = 5; 
     input.num_levels = 16;
     input.theta = 45; 
@@ -229,7 +229,6 @@
 
     elseif (strncmpi('GLCMaO', FeatureId, 6) == 1)
         disp(['GLCMaO features with distance of ' num2str(input.distance) 'and gray-levels of' num2str(input.num_levels) ' are being extracted'])
-        addpath tools/GLCMaO/
        
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -321,8 +320,8 @@
 
     elseif (strncmpi('HoG', FeatureId, 3) == 1)
         disp(['HoG features using ' num2str(input.cellSize) ' as cell-size are being detected'])
-        addpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
-        vl_setup
+        %addpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
+        %vl_setup
         
         %%% Divding the image into patches 
         ystrIdx = 1 : PSize  : size(ImgGray, 2);
@@ -352,10 +351,12 @@
         end
         disp('... done.')
 
+        %rmpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
+                
     elseif (strncmpi('Sift', FeatureId, 3) == 1)
         disp('Sift features are extracted')
-        addpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
-        vl_setup
+        %addpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
+        %vl_setup
         
         if PSize < 16                %%% indicating that the limit size of the window  
             disp('The patch size for Sift can not be smaller than 16 pixels.')
@@ -386,7 +387,8 @@
             feature_matrix = [feature_matrix; feature_patch']; 
         end 
         disp('... done.')
-
+        %rmpath(genpath(fullfile(pwd, 'third_party/vlfeat-0.9.20/toolbox/')))
+        
     elseif (strncmpi('Color1', FeatureId, 6) == 1)
         disp(['Color statistics features are extracted, histogram is made using ' num2str(input.nbins) ' bins'])
         

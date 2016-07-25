@@ -36,16 +36,19 @@
             [cell2mat(data(currFile,1)) '.bmp']));
         Mask = imread(fullfile(ImgPath, name1, cell2mat(data(currFile,1)) ,[cell2mat(data(currFile,1)) name3],...
             [cell2mat(data(currFile,1)) '_lesion.bmp']));
- 
-        LBP_feature{i} = ExtractFeatures_local(Img,'LBP'); 
+         LBP_feature{i} = ExtractFeatures_local(Img,'LBP'); 
         CLBP_feature{i} = ExtractFeatures_local(Img, 'CLBP'); 
         GLCMaO_feature{i} = ExtractFeatures_local(Img, 'GLCMaO'); 
         GLCMaD_feature{i} = ExtractFeatures_local(Img,'GLCMaD' ,'theta', 45, 'num_levels', 32); 
-        Hog_feature{i} = ExtractFeatures_local(Img,'HoG', 'cellSize', 11);
-        sift_feature{i} = ExtractFeatures_local(Img, 'sift'); 
         color_feature{i} = ExtractFeatures_local(Img, 'Color1','nbins' , 30); 
         color_features2{i} = ExtractFeatures_local(Img, 'Color2');
         wavelet_features{i} = ExtractFeatures_local(Img, 'wavelet', 'option2', 'WAL' , 'RI', 0, 'nlevel', 3);
+        %%% The path for VLFEAT should be added here , this path can not be
+        %%% added in the setup since it will ignore lbp and other paths 
+        addpath third_party/vlfeat-0.9.16/toolbox/
+        vl_setup
+        Hog_feature{i} = ExtractFeatures_local(Img,'HoG', 'cellSize', 11);
+        sift_feature{i} = ExtractFeatures_local(Img, 'sift'); 
 
     end 
     
