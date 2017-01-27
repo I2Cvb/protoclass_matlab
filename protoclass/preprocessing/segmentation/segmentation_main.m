@@ -10,12 +10,12 @@
 
 %%% Initialization and indication of datapath
 % Path to the original images
-path_org = '/home/mojdeh/Documents/PhD/Coding/Datasets/Vienna_Central_Hospital/M_D_B/';
+path_org = '/home/lemaitre/Documents/PhD/Coding/Datasets/Vienna_Central_Hospital/M_D_B/';
 % Get the content of the original folder
 content_list = dir( path_org );
 
 %%% indication of segmentation id 
-segId  = 'ls'; 
+segId  = 'fcm'; 
 
 % Annotate each file
 for file = 1:length( content_list )-1
@@ -28,7 +28,7 @@ for file = 1:length( content_list )-1
             disp( [segId  ' segmentation of image ', content_list( file ).name ] );
             im = im2double( imread( fullfile( path_org, content_list( file ).name ) ) );
             [pathstr,name,ext] = fileparts( fullfile( path_org, content_list( file ).name ) );
-            segImg = segmentation (im, segId, 'save_path', [name '-mask']); 
+            segImg = segmentation (im, segId, 'save_path', [name '-mask'], 'save_opt', 'c'); 
 
         end
     end
